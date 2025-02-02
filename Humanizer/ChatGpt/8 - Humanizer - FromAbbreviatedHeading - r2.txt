@@ -1,0 +1,168 @@
+The generated MSTest test does not compile. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test class that does not compile:
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Globalization;
+using Humanizer;
+
+namespace Humanizer.Tests {
+    [TestClass]
+    public class HeadingExtensionsTests {
+        [TestInitialize]
+        public void Setup() {
+            // Mock the Resources.GetResource method to return expected localized values.
+            Resources.GetResource = (key, culture) => {
+                // Mocked resource dictionary
+                var mockedResources = new Dictionary<string, string>
+                {
+                    { "NNE_Short", "NNE_Short" },
+                    { "E_Short", "E_Short" },
+                    { "nne_short", "NNE_Short" } // Normalize for case insensitivity
+                };
+
+                return mockedResources.TryGetValue(key, out var value) ? value : null;
+            };
+        }
+
+        [TestMethod]
+        public void FromAbbreviatedHeading_ValidInput_ReturnsCorrectHeading() {
+            // Arrange
+            string heading = "NNE_Short";
+            double expected = 22.5;
+            CultureInfo culture = CultureInfo.InvariantCulture;
+
+            // Act
+            double result = heading.FromAbbreviatedHeading(culture);
+
+            // Assert
+            Assert.AreEqual(expected, result, 0.001, "The heading does not match the expected value.");
+        }
+
+        [TestMethod]
+        public void FromAbbreviatedHeading_ValidInputWithDifferentCulture_ReturnsCorrectHeading() {
+            // Arrange
+            string heading = "E_Short";
+            double expected = 90.0;
+            CultureInfo culture = new CultureInfo("fr-FR");
+
+            // Act
+            double result = heading.FromAbbreviatedHeading(culture);
+
+            // Assert
+            Assert.AreEqual(expected, result, 0.001, "The heading does not match the expected value for the specified culture.");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void FromAbbreviatedHeading_NullInput_ThrowsArgumentNullException() {
+            // Arrange
+            string heading = null;
+
+            // Act
+            heading.FromAbbreviatedHeading();
+
+            // Assert - Handled by ExpectedException
+        }
+
+        [TestMethod]
+        public void FromAbbreviatedHeading_InvalidInput_ReturnsNegativeOne() {
+            // Arrange
+            string heading = "INVALID_HEADING";
+            double expected = -1;
+
+            // Act
+            double result = heading.FromAbbreviatedHeading();
+
+            // Assert
+            Assert.AreEqual(expected, result, 0.001, "Invalid input should return -1.");
+        }
+
+        [TestMethod]
+        public void FromAbbreviatedHeading_EmptyInput_ReturnsNegativeOne() {
+            // Arrange
+            string heading = string.Empty;
+            double expected = -1;
+
+            // Act
+            double result = heading.FromAbbreviatedHeading();
+
+            // Assert
+            Assert.AreEqual(expected, result, 0.001, "Empty input should return -1.");
+        }
+
+        [TestMethod]
+        public void FromAbbreviatedHeading_UpperAndLowerCaseInput_ReturnsCorrectHeading() {
+            // Arrange
+            string heading = "nne_short";
+            double expected = 22.5;
+
+            // Act
+            double result = heading.FromAbbreviatedHeading();
+
+            // Assert
+            Assert.AreEqual(expected, result, 0.001, "The method should handle case-insensitive inputs correctly.");
+        }
+    }
+}
+
+
+Error Messages:
+Here are the error messages reported by the IDE:
+Severity	Code	Description	Line	Details
+Error (active)	CS1656	Cannot assign to 'GetResource' because it is a 'method group'	12	
+
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the FromAbbreviatedHeading method from the HeadingExtensions class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+namespace Humanizer;
+/// <summary>
+/// Contains extensions to transform a number indicating a heading into the
+/// textual representation of the heading.
+/// </summary>
+public static class HeadingExtensions
+{
+    internal static readonly string[] Headings = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
+    internal static readonly string[] HeadingsShort = ["N_Short", "NNE_Short", "NE_Short", "ENE_Short", "E_Short", "ESE_Short", "SE_Short", "SSE_Short", "S_Short", "SSW_Short", "SW_Short", "WSW_Short", "W_Short", "WNW_Short", "NW_Short", "NNW_Short"];
+    internal static readonly char[] HeadingArrows = ['↑', '↗', '→', '↘', '↓', '↙', '←', '↖'];
+    /// <summary>
+    /// Returns a heading based on the short textual representation of the heading.
+    /// </summary>
+    /// <param name="heading">The short textual representation of a heading</param>
+    /// <param name="culture">The culture of the heading</param>
+    /// <returns>The heading. -1 if the heading could not be parsed.</returns>
+    public static double FromAbbreviatedHeading(this string heading, CultureInfo? culture = null)
+    {
+        if (heading == null)
+        {
+            throw new ArgumentNullException(nameof(heading));
+        }
+
+        culture ??= CultureInfo.CurrentCulture;
+
+        var upperCaseHeading = culture.TextInfo.ToUpper(heading);
+        for (var index = 0; index < HeadingsShort.Length; ++index)
+        {
+            var localizedShortHeading = Resources.GetResource(HeadingsShort[index], culture);
+            if (culture.CompareInfo.Compare(upperCaseHeading, localizedShortHeading) == 0)
+            {
+                return index * 22.5;
+            }
+        }
+
+        return -1;
+    }
+}
+
+Here are additional project-specific details referenced in the method:
+GetResource: Returns the value of the specified string resource
+- Method Signature: public static string GetResource(string resourceKey, CultureInfo? culture = null)
+- namespace: Humanizer
+- returns: The value of the resource localized for the specified culture.
+- param culture: The culture of the resource to retrieve. If not specified, current thread's UI culture is used.
+-param resourceKey: The name of the resource to retrieve.
+

@@ -1,0 +1,117 @@
+The generated MSTest test compiles but fails during execution. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test that does not compile:
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Linq;
+using Humanizer;
+using System.Collections.Generic;
+
+namespace HumanizerTests {
+    [TestClass]
+    public class EnumHumanizeExtensionsTests {
+        private enum SimpleEnum {
+            [System.ComponentModel.Description("First Value")]
+            FirstValue,
+
+            [System.ComponentModel.Description("Second Value")]
+            SecondValue,
+
+            ThirdValue
+        }
+
+        [Flags]
+        private enum FlagsEnum {
+            None = 0,
+            Flag1 = 1,
+            Flag2 = 2,
+            Flag3 = 4
+        }
+		        [TestMethod]
+        public void Humanize_FlagsEnumSingleFlag_ReturnsFlagName() {
+            // Arrange
+            FlagsEnum input = FlagsEnum.Flag1;
+
+            // Act
+            var result = input.Humanize();
+
+            // Assert
+            Assert.AreEqual("Flag1", result);
+        }
+		Here are the error messages reported by the IDE:
+		Assert.AreEqual failed. Expected:<Flag1>. Actual:<Flag 1>. 
+
+		
+		[TestMethod]
+        public void Humanize_FlagsEnumMultipleFlags_ReturnsCombinedNames() {
+            // Arrange
+            FlagsEnum input = FlagsEnum.Flag1 | FlagsEnum.Flag2;
+
+            // Act
+            var result = input.Humanize();
+
+            // Assert
+            Assert.AreEqual("Flag1, Flag2", result);
+		}
+		Here are the error messages reported by the IDE:
+		Assert.AreEqual failed. Expected:<Flag1, Flag2>. Actual:<Flag 1 and Flag 2>. 
+
+
+       [TestMethod]
+       public void Humanize_FlagsEnumNone_ReturnsEmptyString() {
+           // Arrange
+           FlagsEnum input = FlagsEnum.None;
+
+           // Act
+           var result = input.Humanize();
+
+           // Assert
+           Assert.AreEqual(string.Empty, result);
+       }
+	   Here are the error messages reported by the IDE:
+	   Assert.AreEqual failed. Expected:<>. Actual:<None>.
+	}}
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the Humanize method from the EnumHumanizeExtensions class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+namespace Humanizer;
+
+/// <summary>
+/// Contains extension methods for humanizing Enums
+/// </summary>
+public static class EnumHumanizeExtensions
+{
+    /// <summary>
+    /// Turns an enum member into a human readable string; e.g. AnonymousUser -> Anonymous user. It also honors DescriptionAttribute data annotation
+    /// </summary>
+    /// <param name="input">The enum member to be humanized</param>
+    public static string Humanize<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)] T>(this T input)
+        where T : struct, Enum
+    {
+        var (zero, humanized, values) = EnumCache<T>.GetInfo();
+        if (EnumCache<T>.TreatAsFlags(input))
+        {
+            return values
+                .Where(_ => _.CompareTo(zero) != 0 &&
+                            input.HasFlag(_))
+                .Select(_ => _.Humanize())
+                .Humanize();
+        }
+
+        return humanized[input];
+    }
+}
+
+Here are additional project-specific details referenced in the method:
+EnumCache<T>: A static utility class for caching metadata and processing enums.
+- Namespace: Humanizer
+- Methods:
+  - `static (T Zero, FrozenDictionary<T, string> Humanized, FrozenSet<T> Values) GetInfo()`
+  - `static Dictionary<string, T> GetDehumanized()`
+  - `static bool TreatAsFlags(T input)`
+

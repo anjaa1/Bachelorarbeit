@@ -1,0 +1,176 @@
+The generated MSTest test does not compile. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test class that does not compile:
+using FluentValidation.Validators;
+using FluentValidation.TestHelper;
+using FluentAssertions;
+using Xunit;
+
+public class EmptyValidatorTests {
+	[Fact]
+	public void IsValid_returns_true_for_null_value() {
+		// Arrange
+		var validator = new EmptyValidator<string, string>();
+		var context = new ValidationContext<string>("test");
+
+		// Act
+		var result = validator.IsValid(context, (string)null);
+
+		// Assert
+		result.Should().BeTrue();
+	}
+
+	[Fact]
+	public void IsValid_returns_true_for_empty_string() {
+		// Arrange
+		var validator = new EmptyValidator<string, string>();
+		var context = new ValidationContext<string>("test");
+
+		// Act
+		var result = validator.IsValid(context, string.Empty);
+
+		// Assert
+		result.Should().BeTrue();
+	}
+
+	[Fact]
+	public void IsValid_returns_true_for_empty_collection() {
+		// Arrange
+		var validator = new EmptyValidator<string, string[]>();
+		var context = new ValidationContext<string>("test");
+
+		// Act
+		var result = validator.IsValid(context, new string[0]);
+
+		// Assert
+		result.Should().BeTrue();
+	}
+
+	[Fact]
+    using System.Collections;
+    public void IsValid_returns_true_for_empty_enumerable() {
+	// Arrange
+	var validator = new EmptyValidator<string, IEnumerable<string>>();
+	var context = new ValidationContext<string>("test");
+
+	// Act
+	var result = validator.IsValid(context, new List<string>());
+
+	// Assert
+	result.Should().BeTrue();
+}
+
+[Fact]
+public void IsValid_returns_false_for_non_empty_string() {
+	// Arrange
+	var validator = new EmptyValidator<string, string>();
+	var context = new ValidationContext<string>("test");
+
+	// Act
+	var result = validator.IsValid(context, "test");
+
+	// Assert
+	result.Should().BeFalse();
+}
+
+[Fact]
+public void IsValid_returns_false_for_non_empty_collection() {
+	// Arrange
+	var validator = new EmptyValidator<string, string[]>();
+	var context = new ValidationContext<string>("test");
+
+	// Act
+	var result = validator.IsValid(context, new[] { "test" });
+
+	// Assert
+	result.Should().BeFalse();
+}
+
+[Fact]
+public void IsValid_returns_false_for_non_empty_enumerable() {
+	// Arrange
+	var validator = new EmptyValidator<string, IEnumerable<string>>();
+	var context = new ValidationContext<string>("test");
+
+	// Act
+	var result = validator.IsValid(context, new[] { "test" });
+
+	// Assert
+	result.Should().BeFalse();
+}
+
+[Fact]
+public void IsValid_returns_false_for_default_value() {
+	// Arrange
+	var validator = new EmptyValidator<string, string>();
+	var context = new ValidationContext<string>("test");
+
+	// Act
+	var result = validator.IsValid(context, default);
+
+	// Assert
+	result.Should().BeFalse();
+}
+}
+
+
+Error Messages:
+Here are the error messages reported by the IDE:
+Severity	Code	Description	Line	Details
+Error (active)	CS1519	Invalid token 'using' in class, record, struct, or interface member declaration	47	
+Error (active)	CS1513	} expected	46	
+Error (active)	CS1529	A using clause must precede all other elements defined in the namespace except extern alias declarations	47	
+Error (active)	CS8803	Top-level statements must precede namespace and type declarations.	48	
+Error (active)	CS0106	The modifier 'public' is not valid for this item	48	
+Error (active)	CS0106	The modifier 'public' is not valid for this item	61	
+Error (active)	CS0106	The modifier 'public' is not valid for this item	74	
+Error (active)	CS0106	The modifier 'public' is not valid for this item	87	
+Error (active)	CS0106	The modifier 'public' is not valid for this item	100	
+Error (active)	CS1022	Type or namespace definition, or end-of-file expected	111	
+CS0246: The type or namespace name 'XUnit' could not be found (are you missing a using directive or an assembly reference?)
+CS0246: The type or namespace name 'Fact' could not be found (are you missing a using directive or an assembly reference?)
+CS0246: The type or namespace name 'FactAttribute' could not be found (are you missing a using directive or an assembly reference?)
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the IsValid method from the EmptyValidator class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+namespace FluentValidation.Validators;
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
+public class EmptyValidator<T,TProperty> : PropertyValidator<T,TProperty> {
+
+	public override string Name => "EmptyValidator";
+
+	public override bool IsValid(ValidationContext<T> context, TProperty value) {
+		if (value == null) {
+			return true;
+		}
+
+		if (value is string s && string.IsNullOrWhiteSpace(s)) {
+			return true;
+		}
+
+		if (value is ICollection col && col.Count == 0) {
+			return true;
+		}
+
+		if (value is IEnumerable e && IsEmpty(e)) {
+			return true;
+		}
+
+		return EqualityComparer<TProperty>.Default.Equals(value, default);
+	}
+}
+
+Here are additional project-specific details referenced in the method:
+ValidationContext<T>:
+- namespace: FluentValidation
+- Constructor: ValidationContext<T>(T instanceToValidate)
+

@@ -1,0 +1,55 @@
+Create a test class using the MSTest framework to test the Truncate method from the TruncateExtensions class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+namespace Humanizer;
+
+/// <summary>
+/// Allow strings to be truncated
+/// </summary>
+public static class TruncateExtensions
+{
+    /// <summary>
+    /// Truncate the string
+    /// </summary>
+    /// <param name="input">The string to be truncated</param>
+    /// <param name="length">The length to truncate to</param>
+    /// <param name="truncationString">The string used to truncate with</param>
+    /// <param name="truncator">The truncator to use</param>
+    /// <param name="from">The enum value used to determine from where to truncate the string</param>
+    /// <returns>The truncated string</returns>
+    [return: NotNullIfNotNull(nameof(input))]
+    public static string? Truncate(this string? input, int length, string? truncationString, ITruncator truncator, TruncateFrom from = TruncateFrom.Right)
+    {
+        if (truncator == null)
+        {
+            throw new ArgumentNullException(nameof(truncator));
+        }
+
+        if (input == null)
+        {
+            return null;
+        }
+
+        return truncator.Truncate(input, length, truncationString, from);
+    }
+}
+
+Here are additional project-specific details referenced in the method:
+TruncateFrom: Truncation location for humanizer
+- Namespace: Humanizer
+- Values:
+  - `Left`: Truncate letters from the left (start) of the string.
+  - `Right`: Truncate letters from the right (end) of the string.
+  
+
+ITruncator: Can truncate a string
+- Namespace: Humanizer
+- Method:
+- Truncate(string? value, int length, string? truncationString, TruncateFrom truncateFrom = TruncateFrom.Right)
+- Parameters:
+	- value: The string to truncate
+	- langth: The Length to truncate
+	- truncationString: The string used to truncate with
+	- TruncateFrom: The enum value used to determine from where to truncate the string
+	- returns: string or null if value is null

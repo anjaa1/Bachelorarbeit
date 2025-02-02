@@ -1,0 +1,63 @@
+Create a test class using the MSTest framework to test the Only method from the ValidationTestExtension class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+namespace FluentValidation.TestHelper;
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+using Internal;
+using Results;
+using Validators;
+
+public static class ValidationTestExtension {
+	internal const string MatchAnyFailure = "__FV__ANY";
+
+	public static ITestValidationWith Only(this ITestValidationWith failures) {
+		var unmatchedFailures = failures.UnmatchedFailures;
+		var continuation = (TestValidationContinuation) failures;
+
+		// Also add in any unmatched failures from the parent (if there is one) recursively.
+		do {
+			if (continuation.Parent != null) {
+				unmatchedFailures = unmatchedFailures.Union(continuation.Parent.UnmatchedFailures);
+			}
+			continuation = continuation.Parent as TestValidationContinuation;
+		} while (continuation != null);
+
+		var unmatchedFailuresList = unmatchedFailures.ToList();
+
+		if (unmatchedFailuresList.Count > 0) {
+			var errorMessageBanner = "Expected to have errors only matching specified conditions";
+			string errorMessageDetails = "";
+			for (int i = 0; i < unmatchedFailuresList.Count; i++) {
+				errorMessageDetails += $"[{i}]: {unmatchedFailuresList[i].ErrorMessage}\n";
+			}
+			var errorMessage = $"{errorMessageBanner}\n----\nUnexpected Errors:\n{errorMessageDetails}";
+
+			throw new ValidationTestException(errorMessage);
+		}
+		return failures;
+	}
+}
+
+Here are additional project-specific details referenced in the method:
+ITestValidationWith
+- interface: public interface ITestValidationWith : ITestValidationContinuation {
+}
+- namespace: FluentValidation.TestHelper
+- Inherits: ITestValidationContinuation
+
+ITestValidationContinuation
+- namespace: FluentValidation.TestHelper
+- interface: public interface ITestValidationContinuation : IEnumerable<ValidationFailure> {
+	IEnumerable<ValidationFailure> UnmatchedFailures { get; }
+}
+- Properties: IEnumerable<ValidationFailure> UnmatchedFailures
+- methods: IEnumerator<ValidationFailure> GetEnumerator()
+- dependencies: ValidationFailure (Namespace: FluentValidation.Results)

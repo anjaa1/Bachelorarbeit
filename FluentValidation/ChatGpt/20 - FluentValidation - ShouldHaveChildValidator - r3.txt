@@ -1,0 +1,131 @@
+The generated MSTest test compiles but fails during execution. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test that does not compile:
+using System;
+using System.Linq.Expressions;
+using FluentValidation;
+using FluentValidation.TestHelper;
+using FluentValidation.Validators;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace FluentValidationTests {
+	[TestClass]
+	public class ValidationTestExtensionTests {
+
+		private class TestModel {
+			public string ChildProperty { get; set; }
+		}
+
+		private class ChildValidator : AbstractValidator<string> {
+		}
+
+		private class TestModelValidator : AbstractValidator<TestModel> {
+			public TestModelValidator() {
+				RuleFor(x => x.ChildProperty).SetValidator(new ChildValidator());
+			}
+		}
+		
+				[		[TestMethod]
+		public void ShouldHaveChildValidator_InvalidExpression_ThrowsNotSupportedException() {
+			// Arrange
+			var validator = new TestModelValidator();
+
+			// Act & Assert
+			try {
+				validator.ShouldHaveChildValidator(x => x.ChildProperty.Length, typeof(ChildValidator));
+				Assert.Fail("Expected NotSupportedException not thrown.");
+			}
+			catch (NotSupportedException ex) {
+				Assert.IsTrue(ex.Message.Contains("ShouldHaveChildValidator can only be used for simple property expressions"));
+			}
+		}}}
+Error Messages:
+Here are the error messages reported by the IDE:
+Test method FluentValidationTests.ValidationTestExtensionTests.ShouldHaveChildValidator_InvalidExpression_ThrowsNotSupportedException threw exception: 
+FluentValidation.TestHelper.ValidationTestException: Expected property 'Length' to have a child validator of type 'ChildValidator.'. Instead found 'none'
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the ShouldHaveChildValidator method from the ValidationTestExtension class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+namespace FluentValidation.TestHelper;
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+using Internal;
+using Results;
+using Validators;
+
+public static class ValidationTestExtension {
+	internal const string MatchAnyFailure = "__FV__ANY";
+
+	//TODO: Should ShouldHaveChildValidator be deprecated? It isn't recommended and leads to brittle tests.
+	public static void ShouldHaveChildValidator<T, TProperty>(this IValidator<T> validator, Expression<Func<T, TProperty>> expression, Type childValidatorType) {
+		var descriptor = validator.CreateDescriptor();
+		var expressionMemberName = expression.GetMember()?.Name;
+
+		if (expressionMemberName == null && !expression.IsParameterExpression()) {
+			throw new NotSupportedException("ShouldHaveChildValidator can only be used for simple property expressions. It cannot be used for model-level rules or rules that contain anything other than a property reference.");
+		}
+
+		var matchingValidators =
+			expression.IsParameterExpression() ? GetModelLevelValidators<T>(descriptor) :
+				descriptor.GetValidatorsForMember(expressionMemberName)
+					.Select(x => x.Validator)
+					.ToArray();
+
+
+		matchingValidators = matchingValidators.Concat(GetDependentRules(expressionMemberName, expression, descriptor)).ToArray();
+
+		var childValidatorTypes = matchingValidators.OfType<IChildValidatorAdaptor>().Select(x => x.ValidatorType);
+
+		if (childValidatorTypes.All(x => !childValidatorType.IsAssignableFrom(x))) {
+			var childValidatorNames = childValidatorTypes.Any() ? string.Join(", ", childValidatorTypes.Select(x => x.Name)) : "none";
+			throw new ValidationTestException(string.Format("Expected property '{0}' to have a child validator of type '{1}.'. Instead found '{2}'", expressionMemberName, childValidatorType.Name, childValidatorNames));
+		}
+	}
+}
+
+Here are additional project-specific details referenced in the method:
+IValidator<T>
+- namespace: FluentValidation
+- inherits: IValidator
+- methods:
+	- ValidationResult Validate(T instance)
+	- Task<ValidationResult> ValidateAsync(T instance, CancellationToken cancellation = default)
+
+IValidator:
+- namespace: FluentValidation
+- methods:
+	- ValidationResult Validate(IValidationContext context)
+	- Task<ValidationResult> ValidateAsync(IValidationContext context, CancellationToken cancellation = default)
+	- IValidatorDescriptor CreateDescriptor()
+	- bool CanValidateInstancesOfType(Type type)
+- dependencies:
+	- ValidationResult (NameSpace: FluentValidation.Results)
+	- IValidationContext (NameSpace: FluentValidation)
+
+IsParameterExpression: Checks if the expression is a parameter expression
+- namespace: FluentValidation.Internal
+
+GetModelLevelValidators:
+- namespace: FluentValidation.TestHelper
+- method signature: private static IPropertyValidator[] GetModelLevelValidators<T>(IValidatorDescriptor descriptor)
+
+GetDependentRules
+- namespace: FluentValidation.TestHelper
+- mathod signature: private static IEnumerable<IPropertyValidator> GetDependentRules<T, TProperty>(string expressionMemberName, Expression<Func<T, TProperty>> expression, IValidatorDescriptor descriptor)
+
+IChildValidatorAdaptor
+- namespace: FluentValidation.Validators
+- property: Type ValidatorType
+

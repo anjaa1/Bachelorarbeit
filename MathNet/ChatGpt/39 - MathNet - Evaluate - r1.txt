@@ -1,0 +1,193 @@
+The generated MSTest test does not compile. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test class that does not compile:
+using System;
+using System.Collections.Generic;
+using MathNet.Numerics;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace MathNet.Numerics.Tests
+{
+    [TestClass]
+    public class SeriesTests
+    {
+        [TestMethod]
+        public void Evaluate_EmptyInput_ReturnsZero()
+        {
+            // Arrange
+            var summands = new List<double>();
+
+            // Act
+            var result = Series.Evaluate(summands);
+
+            // Assert
+            Assert.AreEqual(0.0, result, "Expected sum of an empty series to be 0.");
+        }
+
+        [TestMethod]
+        public void Evaluate_SingleElement_ReturnsElement()
+        {
+            // Arrange
+            var summands = new List<double> { 42.0 };
+
+            // Act
+            var result = Series.Evaluate(summands);
+
+            // Assert
+            Assert.AreEqual(42.0, result, "Expected sum of a single-element series to equal the element.");
+        }
+
+        [TestMethod]
+        public void Evaluate_MultipleElements_ReturnsCorrectSum()
+        {
+            // Arrange
+            var summands = new List<double> { 1.0, 2.0, 3.0, 4.0 };
+
+            // Act
+            var result = Series.Evaluate(summands);
+
+            // Assert
+            Assert.AreEqual(10.0, result, "Expected sum of the series to be 10.");
+        }
+
+        [TestMethod]
+        public void Evaluate_NegativeAndPositiveElements_ReturnsCorrectSum()
+        {
+            // Arrange
+            var summands = new List<double> { -5.0, 10.0, -3.0, 8.0 };
+
+            // Act
+            var result = Series.Evaluate(summands);
+
+            // Assert
+            Assert.AreEqual(10.0, result, "Expected sum to handle both positive and negative numbers correctly.");
+        }
+
+        [TestMethod]
+        public void Evaluate_LargeNumbers_ReturnsCorrectSum()
+        {
+            // Arrange
+            var summands = new List<double> { 1e16, -1e16, 3.0 };
+
+            // Act
+            var result = Series.Evaluate(summands);
+
+            // Assert
+            Assert.AreEqual(3.0, result, "Expected sum to be numerically stable for large numbers.");
+        }
+
+        [TestMethod]
+        public void Evaluate_SmallNumbers_ReturnsCorrectSum()
+        {
+            // Arrange
+            var summands = new List<double> { 1e-16, 2e-16, 3e-16 };
+
+            // Act
+            var result = Series.Evaluate(summands);
+
+            // Assert
+            Assert.IsTrue(Math.Abs(result - 6e-16) < 1e-18, "Expected sum to handle small numbers with precision.");
+        }
+
+        [TestMethod]
+        public void Evaluate_AlternatingSeries_ConvergesCorrectly()
+        {
+            // Arrange
+            var summands = new List<double> { 1.0, -0.5, 0.25, -0.125, 0.0625 };
+
+            // Act
+            var result = Series.Evaluate(summands);
+
+            // Assert
+            Assert.IsTrue(Math.Abs(result - 0.6875) < 1e-6, "Expected sum to converge correctly for an alternating series.");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void Evaluate_NullInput_ThrowsArgumentNullException()
+        {
+            // Act
+            Series.Evaluate(null);
+        }
+
+        [TestMethod]
+        public void Evaluate_LargeSeries_PerformanceAndCorrectness()
+        {
+            // Arrange
+            var summands = new List<double>();
+            for (int i = 0; i < 1_000_000; i++)
+            {
+                summands.Add(1.0 / (i + 1));
+            }
+
+            // Act
+            var result = Series.Evaluate(summands);
+
+            // Assert
+            Assert.IsTrue(result > 10.0 && result < 15.0, "Expected result to be within the approximate range of the harmonic series sum.");
+        }
+    }
+}
+
+
+Error Messages:
+Here are the error messages reported by the IDE:	
+Severity	Code	Description	Line	Details
+Error (active)	CS0121	The call is ambiguous between the following methods or properties: 'Series.Evaluate(Func<double>)' and 'Series.Evaluate(IEnumerable<double>)'	107	
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the Evaluate method from the Series class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+using System;
+using System.Collections.Generic;
+
+namespace MathNet.Numerics
+{
+    public static class Series
+    {
+        /// <summary>
+        /// Numerically stable series summation (stops automatically).
+        /// </summary>
+        /// <param name="infiniteSummands">provides the summands sequentially</param>
+        /// <returns>Sum</returns>
+        public static double Evaluate(IEnumerable<double> infiniteSummands)
+        {
+            double compensation = 0.0;
+            double current, sum;
+            const double factor = 1 << 16;
+
+            using (var enumerator = infiniteSummands.GetEnumerator())
+            {
+                if (!enumerator.MoveNext())
+                {
+                    return 0.0;
+                }
+
+                sum = enumerator.Current;
+                if (!enumerator.MoveNext())
+                {
+                    return sum;
+                }
+
+                do
+                {
+                    // Kahan Summation
+                    // NOTE (ruegg): do NOT optimize. Now, how to tell that the compiler?
+                    current = enumerator.Current;
+                    double y = current - compensation;
+                    double t = sum + y;
+                    compensation = t - sum;
+                    compensation -= y;
+                    sum = t;
+                } while (Math.Abs(sum) < Math.Abs(factor * current) && enumerator.MoveNext());
+            }
+
+            return sum;
+        }
+    }
+}
+

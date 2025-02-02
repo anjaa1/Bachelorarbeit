@@ -1,0 +1,254 @@
+The generated MSTest test compiles but fails during execution. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test that does not compile:
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Globalization;
+using Humanizer;
+
+namespace Humanizer.Tests {
+    [TestClass]
+    public class DateHumanizeExtensionsTests {
+        private static readonly DateTime Now = DateTime.Now;
+        private static readonly DateTime UtcNow = DateTime.UtcNow;
+        private static readonly CultureInfo EnglishCulture = new CultureInfo("en-US");
+
+        [TestInitialize]
+        public void Setup() {
+            // Reset any global configurations before each test
+            Configurator.DateTimeHumanizeStrategy = null;
+        }
+
+        [TestMethod]
+        public void Humanize_CurrentDateTime_ReturnsNow() {
+            // Arrange
+            DateTime current = Now;
+
+            // Act
+            string result = current.Humanize(dateToCompareAgainst: current);
+
+            // Assert
+            Assert.AreEqual("now", result.ToLower());
+        }
+		Here are the error messages reported by the IDE:
+		Test method Humanizer.Tests.DateHumanizeExtensionsTests.Humanize_CurrentDateTime_ReturnsNow threw exception: 
+System.NullReferenceException: Object reference not set to an instance of an object.
+
+        [TestMethod]
+        public void Humanize_OneMinuteAgo_ReturnsOneMinuteAgo() {
+            // Arrange
+            DateTime input = Now.AddMinutes(-1);
+
+            // Act
+            string result = input.Humanize(dateToCompareAgainst: Now);
+
+            // Assert
+            Assert.AreEqual("1 minute ago", result.ToLower());
+        }
+		Here are the error messages reported by the IDE:
+		 Test method Humanizer.Tests.DateHumanizeExtensionsTests.Humanize_OneMinuteAgo_ReturnsOneMinuteAgo threw exception: 
+System.NullReferenceException: Object reference not set to an instance of an object.
+
+        [TestMethod]
+        public void Humanize_OneHourFromNow_ReturnsOneHourFromNow() {
+            // Arrange
+            DateTime input = Now.AddHours(1);
+
+            // Act
+            string result = input.Humanize(dateToCompareAgainst: Now);
+
+            // Assert
+            Assert.AreEqual("1 hour from now", result.ToLower());
+        }
+		Here are the error messages reported by the IDE:
+		 Test method Humanizer.Tests.DateHumanizeExtensionsTests.Humanize_OneHourFromNow_ReturnsOneHourFromNow threw exception: 
+System.NullReferenceException: Object reference not set to an instance of an object.
+
+        [TestMethod]
+        public void Humanize_OneDayAgo_ReturnsYesterday() {
+            // Arrange
+            DateTime input = Now.AddDays(-1);
+
+            // Act
+            string result = input.Humanize(dateToCompareAgainst: Now);
+
+            // Assert
+            Assert.AreEqual("yesterday", result.ToLower());
+        }
+		Here are the error messages reported by the IDE:
+		Test method Humanizer.Tests.DateHumanizeExtensionsTests.Humanize_OneDayAgo_ReturnsYesterday threw exception: 
+System.NullReferenceException: Object reference not set to an instance of an object.
+
+        [TestMethod]
+        public void Humanize_OneDayFromNow_ReturnsTomorrow() {
+            // Arrange
+            DateTime input = Now.AddDays(1);
+
+            // Act
+            string result = input.Humanize(dateToCompareAgainst: Now);
+
+            // Assert
+            Assert.AreEqual("tomorrow", result.ToLower());
+        }
+		Here are the error messages reported by the IDE:
+		Test method Humanizer.Tests.DateHumanizeExtensionsTests.Humanize_OneDayFromNow_ReturnsTomorrow threw exception: 
+System.NullReferenceException: Object reference not set to an instance of an object.
+
+        [TestMethod]
+        public void Humanize_WithCustomCulture_ReturnsLocalizedString() {
+            // Arrange
+            DateTime input = Now.AddDays(-1);
+            CultureInfo spanishCulture = new CultureInfo("es-ES");
+
+            // Act
+            string result = input.Humanize(culture: spanishCulture);
+
+            // Assert
+            Assert.AreEqual("ayer", result.ToLower());
+        }
+		Here are the error messages reported by the IDE:
+		 Test method Humanizer.Tests.DateHumanizeExtensionsTests.Humanize_WithCustomCulture_ReturnsLocalizedString threw exception: 
+System.NullReferenceException: Object reference not set to an instance of an object.
+
+        [TestMethod]
+        public void Humanize_WithUtcDate_UsesUtcComparison() {
+            // Arrange
+            DateTime input = UtcNow.AddHours(-2);
+
+            // Act
+            string result = input.Humanize(utcDate: true, dateToCompareAgainst: UtcNow);
+
+            // Assert
+            Assert.AreEqual("2 hours ago", result.ToLower());
+        }
+		Here are the error messages reported by the IDE:
+		Test method Humanizer.Tests.DateHumanizeExtensionsTests.Humanize_WithUtcDate_UsesUtcComparison threw exception: 
+System.NullReferenceException: Object reference not set to an instance of an object.
+
+        [TestMethod]
+        public void Humanize_OneYearAgo_ReturnsOneYearAgo() {
+            // Arrange
+            DateTime input = Now.AddYears(-1);
+
+            // Act
+            string result = input.Humanize(dateToCompareAgainst: Now);
+
+            // Assert
+            Assert.AreEqual("1 year ago", result.ToLower());
+        }
+		Here are the error messages reported by the IDE:
+		Test method Humanizer.Tests.DateHumanizeExtensionsTests.Humanize_OneYearAgo_ReturnsOneYearAgo threw exception: 
+System.NullReferenceException: Object reference not set to an instance of an object.
+
+        [TestMethod]
+        public void Humanize_FutureDate_ReturnsCorrectPhrase() {
+            // Arrange
+            DateTime input = Now.AddMonths(3);
+
+            // Act
+            string result = input.Humanize(dateToCompareAgainst: Now);
+
+            // Assert
+            Assert.AreEqual("3 months from now", result.ToLower());
+        }
+		Here are the error messages reported by the IDE:
+		Test method Humanizer.Tests.DateHumanizeExtensionsTests.Humanize_FutureDate_ReturnsCorrectPhrase threw exception: 
+System.NullReferenceException: Object reference not set to an instance of an object.
+
+        [TestMethod]
+        public void Humanize_ExtremelyFutureDate_HandlesLargeTimeSpan() {
+            // Arrange
+            DateTime input = Now.AddYears(100);
+
+            // Act
+            string result = input.Humanize(dateToCompareAgainst: Now);
+
+            // Assert
+            Assert.AreEqual("100 years from now", result.ToLower());
+        }
+		Here are the error messages reported by the IDE:
+		Test method Humanizer.Tests.DateHumanizeExtensionsTests.Humanize_ExtremelyFutureDate_HandlesLargeTimeSpan threw exception: 
+System.NullReferenceException: Object reference not set to an instance of an object.
+
+        [TestMethod]
+        public void Humanize_WithNullComparisonDate_UsesCurrentDateTime() {
+            // Arrange
+            DateTime input = DateTime.Now.AddMinutes(-5);
+
+            // Act
+            string result = input.Humanize(dateToCompareAgainst: null);
+
+            // Assert
+            Assert.IsTrue(result.ToLower().Contains("minutes ago"));
+        }
+		Here are the error messages reported by the IDE:
+		 Test method Humanizer.Tests.DateHumanizeExtensionsTests.Humanize_WithNullComparisonDate_UsesCurrentDateTime threw exception: 
+System.NullReferenceException: Object reference not set to an instance of an object.
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void Humanize_WithInvalidCulture_ThrowsArgumentException() {
+            // Arrange
+            DateTime input = Now;
+            CultureInfo invalidCulture = null;
+
+            // Act & Assert
+            input.Humanize(culture: invalidCulture);
+        }
+		Here are the error messages reported by the IDE:
+		Test method threw exception System.NullReferenceException, but exception System.ArgumentException was expected. Exception message: System.NullReferenceException: Object reference not set to an instance of an object.
+    }
+}
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the Humanize method from the DateHumanizeExtensions class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+namespace Humanizer;
+
+/// <summary>
+/// Humanizes DateTime into human readable sentence
+/// </summary>
+public static class DateHumanizeExtensions
+{
+    public static string Humanize(this DateTime? input, bool? utcDate = null, DateTime? dateToCompareAgainst = null, CultureInfo? culture = null)
+    {
+        if (input.HasValue)
+        {
+            return Humanize(input.Value, utcDate, dateToCompareAgainst, culture);
+        }
+
+        return Configurator
+            .GetFormatter(culture)
+            .DateHumanize_Never();
+    }
+}
+
+Here are additional project-specific details referenced in the method:
+
+Configurator: Provides a configuration point for Humanizer
+- Namespace: Humanizer
+- Details:
+	- Regristries:
+		- CollectionFormatters: A registry of formatters used to format collections based on the current locale
+		- Formatters: Registry for string formatters based on the current locale.
+		- NumberToWordsConverters: Registry for number-to-words converters for localization.
+		- Ordinalizers: Registry for ordinalizers used in localization.
+		- DateToOrdinalWordsConverters: Registry for date-to-ordinal-word converters.
+		- DateOnlyToOrdinalWordsConverters (NET6.0+): Registry for date-only ordinal converters.
+		- TimeOnlyToClockNotationConverters (NET6.0+): Registry for time-only to clock notation converters.
+- Strategies:
+	- DateTimeHumanizeStrategy: Defines the strategy for humanizing DateTime.
+	- DateTimeOffsetHumanizeStrategy: Defines the strategy for humanizing DateTimeOffset.
+	- DateOnlyHumanizeStrategy (NET6.0+): Defines the strategy for humanizing DateOnly.
+	- TimeOnlyHumanizeStrategy (NET6.0+): Defines the strategy for humanizing TimeOnly
+- Methods:
+	- public static void UseEnumDescriptionPropertyLocator(Func<PropertyInfo, bool> func): Sets a predicate for locating description properties for enums.
+
+Humanize: Turns the current or provided date into human readable sentence
+- returns: distance of time in words
+- method signature: public static string Humanize(this DateTime input, bool? utcDate = null, DateTime? dateToCompareAgainst = null, CultureInfo? culture = null)

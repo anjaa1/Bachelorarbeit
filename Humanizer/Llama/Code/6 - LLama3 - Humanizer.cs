@@ -1,0 +1,80 @@
+//using Microsoft.VisualStudio.TestTools.UnitTesting;
+//using System;
+//using System.Diagnostics;
+
+//namespace Humanizer.Test {
+//    [TestClass]
+//    public class RomanNumeralExtensionsTests {
+//        [TestMethod]
+//        public void FromRoman_ValidInput_ReturnsCorrectValue() {
+//            // Arrange
+//            var input = "XII";
+
+//            // Act
+//            var result = RomanNumeralExtensions.FromRoman(input);
+
+//            // Assert
+//            Assert.AreEqual(12, result);
+//        }
+
+//        [TestMethod]
+//        public void FromRoman_InvalidInput_ThrowsArgumentException() {
+//            // Arrange
+//            var input = "";
+
+//            // Act and Assert
+//            Assert.ThrowsException<ArgumentException>(() => RomanNumeralExtensions.FromRoman(input));
+//        }
+
+//        [TestMethod]
+//        public void FromRoman_EmptyInput_ThrowsArgumentException() {
+//            // Arrange
+//            var input = "   ";
+
+//            // Act and Assert
+//            Assert.ThrowsException<ArgumentException>(() => RomanNumeralExtensions.FromRoman(input));
+//        }
+
+//        [TestMethod]
+//        public void FromRoman_NullInput_ThrowsArgumentException() {
+//            // Arrange
+//            var input = (CharSpan)null;
+
+//            // Act and Assert
+//            Assert.ThrowsException<ArgumentException>(() => RomanNumeralExtensions.FromRoman(input));
+//        }
+
+//        [TestMethod]
+//        public void FromRoman_TypicalCase_ReturnsCorrectValue() {
+//            // Arrange
+//            var input = "MCMXCIX";
+
+//            // Act
+//            var result = RomanNumeralExtensions.FromRoman(input);
+
+//            // Assert
+//            Assert.AreEqual(1999, result);
+//        }
+
+//        [TestMethod]
+//        public void FromRoman_EdgeCase_ReturnsCorrectValue() {
+//            // Arrange
+//            var input = "I";
+
+//            // Act
+//            var result = RomanNumeralExtensions.FromRoman(input);
+
+//            // Assert
+//            Assert.AreEqual(1, result);
+//        }
+
+//        [TestMethod]
+//        public void FromRoman_InvalidRomanNumeral_ThrowsArgumentException() {
+//            // Arrange
+//            var input = "Invalid";
+
+//            // Act and Assert
+//            Assert.ThrowsException<ArgumentException>(() => RomanNumeralExtensions.FromRoman(input));
+//        }
+//    }
+//}

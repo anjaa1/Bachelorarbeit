@@ -1,0 +1,45 @@
+Create a test class using the MSTest framework to test the ToRoman method from the RomanNumeralExtensions class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+using System.Diagnostics;
+
+namespace Humanizer;
+
+/// <summary>
+/// Contains extension methods for changing a number to Roman representation (ToRoman) and from Roman representation back to the number (FromRoman)
+/// </summary>
+public static class RomanNumeralExtensions
+{
+    /// <summary>
+    /// Converts the input to Roman number
+    /// </summary>
+    /// <param name="input">Integer input</param>
+    /// <returns>Roman number</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when the input is smaller than 1 or larger than 3999</exception>
+    public static string ToRoman(this int input)
+    {
+        const int minValue = 1;
+        const int maxValue = 3999;
+        const int maxRomanNumeralLength = 15;
+
+        if (input is < minValue or > maxValue)
+        {
+            throw new ArgumentOutOfRangeException();
+        }
+
+        Span<char> builder = stackalloc char[maxRomanNumeralLength];
+        var pos = 0;
+
+        foreach (var pair in RomanNumeralsSequence)
+        {
+            while (input >= pair.Value)
+            {
+                pair.Key.AsSpan().CopyTo(builder.Slice(pos));
+                pos += pair.Key.Length;
+                input -= pair.Value;
+            }
+        }
+
+        return builder.Slice(0, pos).ToString();
+    }
+}

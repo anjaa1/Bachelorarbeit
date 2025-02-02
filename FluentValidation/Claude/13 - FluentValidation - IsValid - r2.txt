@@ -1,0 +1,103 @@
+The generated MSTest test compiles but fails during execution. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test that does not compile:
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using FluentValidation;
+using FluentValidation.Validators;
+
+namespace FluentValidation.Tests {
+	[TestClass]
+	public class CreditCardValidatorTests {
+		private CreditCardValidator<TestModel> validator;
+		private ValidationContext<TestModel> context;
+		private TestModel model;
+
+		[TestInitialize]
+		public void Setup() {
+			validator = new CreditCardValidator<TestModel>();
+			model = new TestModel();
+			context = new ValidationContext<TestModel>(model);
+		}
+				[TestMethod]
+		public void IsValid_WithEmptyString_ReturnsFalse() {
+			// Arrange
+			string emptyCard = string.Empty;
+
+			// Act
+			bool result = validator.IsValid(context, emptyCard);
+
+			// Assert
+			Assert.IsFalse(result);
+		}
+		Here are the error messages reported by the IDE:
+		Assert.IsFalse failed. 
+
+				[TestMethod]
+		public void IsValid_WithAllZeros_ReturnsFalse() {
+			// Arrange - All zeros fails Luhn algorithm
+			string allZeros = "0000000000000000";
+
+			// Act
+			bool result = validator.IsValid(context, allZeros);
+
+			// Assert
+			Assert.IsFalse(result);
+		}
+		Here are the error messages reported by the IDE:
+		Assert.IsFalse failed. 
+				// Helper class for testing
+		private class TestModel {
+			public string CreditCardNumber { get; set; }
+		}
+	}
+}
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the IsValid method from the CreditCardValidator class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+namespace FluentValidation.Validators;
+
+using System.Linq;
+
+/// <summary>
+/// Ensures that the property value is a valid credit card number.
+/// </summary>
+public class CreditCardValidator<T> : PropertyValidator<T,string>, ICreditCardValidator {
+	public override bool IsValid(ValidationContext<T> context, string value) {
+		if (value == null) {
+			return true;
+		}
+
+		value = value.Replace("-", "").Replace(" ", "");
+
+		int checksum = 0;
+		bool evenDigit = false;
+		// http://www.beachnet.com/~hstiles/cardtype.html
+		foreach (char digit in value.ToCharArray().Reverse()) {
+			if (!char.IsDigit(digit)) {
+				return false;
+			}
+
+			int digitValue = (digit - '0') * (evenDigit ? 2 : 1);
+			evenDigit = !evenDigit;
+
+			while (digitValue > 0) {
+				checksum += digitValue % 10;
+				digitValue /= 10;
+			}
+		}
+
+		return (checksum % 10) == 0;
+	}
+}
+
+Here are additional project-specific details referenced in the method:
+ValidationContext<T>:
+- namespace: FluentValidation
+- Constructor: ValidationContext<T>(T instanceToValidate)
+

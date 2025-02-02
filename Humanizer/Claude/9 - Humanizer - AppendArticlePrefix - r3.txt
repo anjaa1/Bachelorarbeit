@@ -1,0 +1,126 @@
+The generated MSTest test compiles but fails during execution. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test that does not compile:
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using Humanizer;
+
+namespace Humanizer.Tests
+{
+    [TestClass]
+    public class EnglishArticleTests
+    {
+        [TestMethod]
+        public void AppendArticlePrefix_WithExtraWhitespace_ReturnsNormalizedArray()
+        {
+            // Arrange
+            var input = new[]
+            {
+                "  The    Cat  ",
+                "A   Dog",
+                "   An    Elephant    "
+            };
+
+            var expected = new[]
+            {
+                "Cat The",
+                "Dog A",
+                "Elephant An"
+            };
+
+            // Act
+            var result = EnglishArticle.AppendArticlePrefix(input);
+
+            // Assert
+            CollectionAssert.AreEqual(expected, result);
+        }
+		Here are the error messages reported by the IDE:
+		 CollectionAssert.AreEqual failed. (Element at index 0 do not match.)
+		 
+        [TestMethod]
+        public void AppendArticlePrefix_WithMixedArticlesAndNoArticles_ReturnsCorrectlySortedArray()
+        {
+            // Arrange
+            var input = new[]
+            {
+                "The Cat",
+                "Plain Dog",
+                "An Elephant",
+                "Simple Bird",
+                "a Mouse"
+            };
+
+            var expected = new[]
+            {
+                "Simple Bird",  // Note: No article to move
+                "Cat The",
+                "Plain Dog",    // Note: No article to move
+                "Elephant An",
+                "Mouse a"
+            };
+
+            // Act
+            var result = EnglishArticle.AppendArticlePrefix(input);
+
+            // Assert
+            CollectionAssert.AreEqual(expected, result);
+        }
+		Here are the error messages reported by the IDE:
+		 CollectionAssert.AreEqual failed. (Element at index 0 do not match.)
+		 }}
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the AppendArticlePrefix method from the EnglishArticle class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+namespace Humanizer;
+
+/// <summary>
+/// Contains methods for removing, appending and prepending article prefixes for sorting strings ignoring the article.
+/// </summary>
+public static class EnglishArticle
+{
+    static readonly Regex _regex = new("^((The)|(the)|(a)|(A)|(An)|(an))\\s\\w+", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Removes the prefixed article and appends it to the same string.
+    /// </summary>
+    /// <param name="items">The input array of strings</param>
+    /// <returns>Sorted string array</returns>
+    public static string[] AppendArticlePrefix(string[] items)
+    {
+        if (items.Length == 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(items));
+        }
+
+        var transformed = new string[items.Length];
+
+        for (var i = 0; i < items.Length; i++)
+        {
+            var item = items[i]
+                .AsSpan();
+            if (_regex.IsMatch(item))
+            {
+                var indexOf = item.IndexOf(' ');
+                var removed = item[indexOf..]
+                    .TrimStart();
+                var article = item[..indexOf]
+                    .TrimEnd();
+                transformed[i] = $"{removed} {article}";
+            }
+            else
+            {
+                transformed[i] = item
+                    .Trim()
+                    .ToString();
+            }
+        }
+
+        Array.Sort(transformed);
+        return transformed;
+    }
+}

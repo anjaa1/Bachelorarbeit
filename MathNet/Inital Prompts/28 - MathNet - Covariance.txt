@@ -1,0 +1,62 @@
+Create a test class using the MSTest framework to test the Covariance method from the StreamingStatistics class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Complex = System.Numerics.Complex;
+
+namespace MathNet.Numerics.Statistics
+{
+    /// <summary>
+    /// Statistics operating on an IEnumerable in a single pass, without keeping the full data in memory.
+    /// Can be used in a streaming way, e.g. on large datasets not fitting into memory.
+    /// </summary>
+    /// <seealso cref="SortedArrayStatistics"/>
+    /// <seealso cref="StreamingStatistics"/>
+    /// <seealso cref="Statistics"/>
+    public static class StreamingStatistics
+    {
+        /// <summary>
+        /// Estimates the unbiased population covariance from the provided two sample enumerable sequences, in a single pass without memoization.
+        /// On a dataset of size N will use an N-1 normalizer (Bessel's correction).
+        /// Returns NaN if data has less than two entries or if any entry is NaN.
+        /// </summary>
+        /// <param name="samples1">First sample stream.</param>
+        /// <param name="samples2">Second sample stream.</param>
+        public static double Covariance(IEnumerable<double> samples1, IEnumerable<double> samples2)
+        {
+            // https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
+            var n = 0;
+            var mean1 = 0.0;
+            var mean2 = 0.0;
+            var comoment = 0.0;
+
+            using (var s1 = samples1.GetEnumerator())
+            using (var s2 = samples2.GetEnumerator())
+            {
+                while (s1.MoveNext())
+                {
+                    if (!s2.MoveNext())
+                    {
+                        throw new ArgumentException("All vectors must have the same dimensionality.");
+                    }
+
+                    var mean2Prev = mean2;
+                    n++;
+                    mean1 += (s1.Current - mean1)/n;
+                    mean2 += (s2.Current - mean2)/n;
+                    comoment += (s1.Current - mean1)*(s2.Current - mean2Prev);
+                }
+
+                if (s2.MoveNext())
+                {
+                    throw new ArgumentException("All vectors must have the same dimensionality.");
+                }
+            }
+
+            return n > 1 ? comoment/(n - 1) : double.NaN;
+        }
+	}
+}

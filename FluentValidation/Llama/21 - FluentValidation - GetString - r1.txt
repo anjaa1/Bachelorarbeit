@@ -1,0 +1,229 @@
+The generated MSTest test does not compile. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test class that does not compile:
+using System;
+using System.Globalization;
+using FluentAssertions;
+using FluentAssertions.Execution;
+using FluentAssertions.Primitives;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace FluentValidation.Resources.Tests;
+
+[TestClass]
+public class LanguageManagerTests {
+	[TestMethod]
+	public void GetString_ValidKey_ReturnsTranslation() {
+		// Arrange
+		var manager = new LanguageManager();
+		manager.AddTranslation("en", "key", "Translation");
+		manager.AddTranslation("fr", "key", "Traduction");
+
+		// Act
+		var result = manager.GetString("key");
+
+		// Assert
+		result.Should().Be("Translation");
+	}
+
+	[TestMethod]
+	public void GetString_InvalidKey_ReturnsEmptyString() {
+		// Arrange
+		var manager = new LanguageManager();
+
+		// Act
+		var result = manager.GetString("key");
+
+		// Assert
+		result.Should().BeEmpty();
+	}
+
+	[TestMethod]
+	public void GetString_SpecificCulture_ReturnsTranslation() {
+		// Arrange
+		var manager = new LanguageManager();
+		manager.AddTranslation("en", "key", "Translation");
+		manager.AddTranslation("fr", "key", "Traduction");
+
+		// Act
+		var result = manager.GetString("key", CultureInfo.CreateSpecificCulture("fr"));
+
+		// Assert
+		result.Should().Be("Traduction");
+	}
+
+	[TestMethod]
+	public void GetString_SpecificCulture_WithNoTranslation_ReturnsDefaultCulture() {
+		// Arrange
+		var manager = new LanguageManager();
+		manager.AddTranslation("en", "key", "Translation");
+
+		// Act
+		var result = manager.GetString("key", CultureInfo.CreateSpecificCulture("fr"));
+
+		// Assert
+		result.Should().Be("Translation");
+	}
+
+	[TestMethod]
+	public void GetString_SpecificCulture_WithNoTranslationAndParentCulture_ReturnsDefaultCulture() {
+		// Arrange
+		var manager = new LanguageManager();
+		manager.AddTranslation("en", "key", "Translation");
+
+		// Act
+		var result = manager.GetString("key", CultureInfo.CreateSpecificCulture("de-DE"));
+
+		// Assert
+		result.Should().Be("Translation");
+	}
+
+	[TestMethod]
+	public void GetString_SpecificCulture_WithNoTranslationAndParentCultureAndFallbackCulture_ReturnsFallbackCulture() {
+		// Arrange
+		var manager = new LanguageManager();
+		manager.AddTranslation("en", "key", "Translation");
+
+		// Act
+		var result = manager.GetString("key", CultureInfo.CreateSpecificCulture("es-ES"));
+
+		// Assert
+		result.Should().Be("Translation");
+	}
+
+	[TestMethod]
+	public void GetString_DisabledLocalization_ReturnsTranslationFromDefaultCulture() {
+		// Arrange
+		var manager = new LanguageManager();
+		manager.AddTranslation("en", "key", "Translation");
+		manager.Enabled = false;
+
+		// Act
+		var result = manager.GetString("key");
+
+		// Assert
+		result.Should().Be("Translation");
+	}
+
+	[TestMethod]
+	public void GetString_DisabledLocalization_WithNoTranslation_ReturnsEmptyString() {
+		// Arrange
+		var manager = new LanguageManager();
+		manager.Enabled = false;
+
+		// Act
+		var result = manager.GetString("key");
+
+		// Assert
+		result.Should().BeEmpty();
+	}
+
+	[TestMethod]
+	public void GetString_NullCulture_ReturnsTranslationFromDefaultCulture() {
+		// Arrange
+		var manager = new LanguageManager();
+		manager.AddTranslation("en", "key", "Translation");
+
+		// Act
+		var result = manager.GetString("key", null);
+
+		// Assert
+		result.Should().Be("Translation");
+	}
+}
+
+
+Error Messages:
+Here are the error messages reported by the IDE:
+Severity	Code	Description	Line	Details
+Error (active)	CS0246	The type or namespace name 'FluentAssertions' could not be found (are you missing a using directive or an assembly reference?)	3	
+Error (active)	CS0246	The type or namespace name 'FluentAssertions' could not be found (are you missing a using directive or an assembly reference?)	4	
+Error (active)	CS0246	The type or namespace name 'FluentAssertions' could not be found (are you missing a using directive or an assembly reference?)	5	
+
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the GetString method from the LanguageManager class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+namespace FluentValidation.Resources;
+
+using System;
+using System.Collections.Concurrent;
+using System.Globalization;
+
+/// <summary>
+/// Allows the default error message translations to be managed.
+/// </summary>
+public class LanguageManager : ILanguageManager {
+	private readonly ConcurrentDictionary<string, string> _languages = new ConcurrentDictionary<string, string>();
+	/// <summary>
+	/// Whether localization is enabled.
+	/// </summary>
+	public bool Enabled { get; set; } = true;
+
+	/// <summary>
+	/// Default culture to use for all requests to the LanguageManager. If not specified, uses the current UI culture.
+	/// </summary>
+	public CultureInfo Culture { get; set; }
+
+	/// <summary>
+	/// Removes all languages except the default.
+	/// </summary>
+	public void Clear() {
+		_languages.Clear();
+	}
+	/// <summary>
+	/// Gets a translated string based on its key. If the culture is specific and it isn't registered, we try the neutral culture instead.
+	/// If no matching culture is found  to be registered we use English.
+	/// </summary>
+	/// <param name="key">The key</param>
+	/// <param name="culture">The culture to translate into</param>
+	/// <returns></returns>
+	public virtual string GetString(string key, CultureInfo culture = null) {
+		string value;
+
+		if (Enabled) {
+			culture = culture ?? Culture ?? CultureInfo.CurrentUICulture;
+
+			string currentCultureKey = culture.Name + ":" + key;
+			value = _languages.GetOrAdd(currentCultureKey, k => GetTranslation(culture.Name, key));
+
+			// If the value couldn't be found, try the parent culture.
+			var currentCulture = culture;
+			while (value == null && currentCulture.Parent != CultureInfo.InvariantCulture) {
+				currentCulture = currentCulture.Parent;
+				string parentCultureKey = currentCulture.Name + ":" + key;
+				value = _languages.GetOrAdd(parentCultureKey, k => GetTranslation(currentCulture.Name, key));
+			}
+
+			if (value == null && culture.Name != EnglishLanguage.Culture) {
+				// If it couldn't be found, try the fallback English (if we haven't tried it already).
+				if (!culture.IsNeutralCulture && culture.Parent.Name != EnglishLanguage.Culture) {
+					value = _languages.GetOrAdd(EnglishLanguage.Culture + ":" + key, k => EnglishLanguage.GetTranslation(key));
+				}
+			}
+		}
+		else {
+			value = _languages.GetOrAdd(EnglishLanguage.Culture + ":" + key, k => EnglishLanguage.GetTranslation(key));
+		}
+
+		return value ?? string.Empty;
+	}
+}
+
+Here are additional project-specific details referenced in the method:
+AddTranslation
+- namespace: FluentValidation.Resources
+-  belongs to class LanguageManager
+- method Signature: public void AddTranslation(string language, string key, string message)
+
+_languages:
+- Type: ConcurrentDictionary<string, string>
+
+GetTranslation
+- Access: private
+- method signature: private static string GetTranslation(string culture, string key)
+	
+

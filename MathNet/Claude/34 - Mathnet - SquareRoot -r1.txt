@@ -1,0 +1,140 @@
+The generated MSTest test compiles but fails during execution. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test that does not compile:
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Numerics;
+using MathNet.Numerics;
+
+[TestClass]
+public class ComplexExtensionsTests
+{
+    private const double Precision = 1e-12;
+    [TestMethod]
+    public void SquareRoot_LargeNumbers_ReturnsCorrectResult()
+    {
+        // Arrange
+        var complex = new Complex(1e150, 1e150);
+
+        // Act
+        var result = complex.SquareRoot();
+
+        // Assert
+        // Verify that (result * result) equals the original number
+        var squared = result * result;
+        AssertComplexEqual(complex, squared);
+    }
+	Here are the error messages reported by the IDE:
+	Assert.AreEqual failed. Expected a difference no greater than <1E-12> between expected value <1E+150> and actual value <9,999999999999998E+149>. Real parts differ. Expected: 1E+150, Actual: 9,999999999999998E+149
+	
+	    [TestMethod]
+    public void SquareRoot_NegativeImaginaryNumber_ReturnsCorrectResult()
+    {
+        // Arrange
+        var complex = new Complex(0.0, -16.0);
+        var expected = new Complex(2.0, -4.0);
+
+        // Act
+        var result = complex.SquareRoot();
+
+        // Assert
+        AssertComplexEqual(expected, result);
+    }
+	Here are the error messages reported by the IDE:
+	Assert.AreEqual failed. Expected a difference no greater than <1E-12> between expected value <2> and actual value <2,8284271247461903>. Real parts differ. Expected: 2, Actual: 2,8284271247461903
+	
+	    [TestMethod]
+    public void SquareRoot_PureImaginaryNumber_ReturnsCorrectResult()
+    {
+        // Arrange
+        var complex = new Complex(0.0, 16.0);
+        var expected = new Complex(2.0, 4.0);
+
+        // Act
+        var result = complex.SquareRoot();
+
+        // Assert
+        AssertComplexEqual(expected, result);
+    }
+	Here are the error messages reported by the IDE:
+	 Assert.AreEqual failed. Expected a difference no greater than <1E-12> between expected value <2> and actual value <2,8284271247461903>. Real parts differ. Expected: 2, Actual: 2,8284271247461903
+	
+}}
+
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the SquareRoot method from the ComplexExtensions class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+using System;
+using System.Collections.Generic;
+using Complex = System.Numerics.Complex;
+using System.Runtime;
+
+namespace MathNet.Numerics
+{
+    /// <summary>
+    /// Extension methods for the Complex type provided by System.Numerics
+    /// </summary>
+    public static class ComplexExtensions
+    {
+		/// <summary>
+		/// The Square Root (power 1/2) of this <c>Complex</c>
+		/// </summary>
+		/// <param name="complex">The <see cref="Complex"/> number to perform this operation on.</param>
+		/// <returns>
+		/// The square root of this complex number.
+		/// </returns>
+		public static Complex SquareRoot(this Complex complex)
+		{
+			// Note: the following code should be equivalent to Complex.Sqrt(complex),
+			// but it turns out that is implemented poorly in System.Numerics,
+			// hence we provide our own implementation here. Do not replace.
+
+			if (complex.IsRealNonNegative())
+			{
+				return new Complex(Math.Sqrt(complex.Real), 0.0);
+			}
+
+			Complex result;
+
+			var absReal = Math.Abs(complex.Real);
+			var absImag = Math.Abs(complex.Imaginary);
+			double w;
+			if (absReal >= absImag)
+			{
+				var ratio = complex.Imaginary / complex.Real;
+				w = Math.Sqrt(absReal) * Math.Sqrt(0.5 * (1.0 + Math.Sqrt(1.0 + (ratio * ratio))));
+			}
+			else
+			{
+				var ratio = complex.Real / complex.Imaginary;
+				w = Math.Sqrt(absImag) * Math.Sqrt(0.5 * (Math.Abs(ratio) + Math.Sqrt(1.0 + (ratio * ratio))));
+			}
+
+			if (complex.Real >= 0.0)
+			{
+				result = new Complex(w, complex.Imaginary / (2.0 * w));
+			}
+			else if (complex.Imaginary >= 0.0)
+			{
+				result = new Complex(absImag / (2.0 * w), w);
+			}
+			else
+			{
+				result = new Complex(absImag / (2.0 * w), -w);
+			}
+
+			return result;
+		}
+	}
+}
+
+Here are additional project-specific details referenced in the method:
+
+Complex: A structure representing complex numbers with real and imaginary parts. It provides methods for mathematical operations
+- Constructor: public Complex(double real, double imaginary)
+- Namespace: System.Numerics
+

@@ -1,0 +1,212 @@
+The generated MSTest test does not compile. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test class that does not compile:
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MathNet.Numerics;
+using MathNet.Numerics.Specifications;
+
+namespace MathNet.Numerics.Tests
+{
+    [TestClass]
+    public class GammaLowerRegularizedTests
+    {
+        [TestMethod]
+        public void GammaLowerRegularized_TypicalValues_ReturnsExpectedResults()
+        {
+            // Arrange
+            double a = 1.5;
+            double x = 2.0;
+
+            // Act
+            double result = SpecialFunctions.GammaLowerRegularized(a, x);
+
+            // Assert
+            Assert.IsTrue(result.AlmostEqual(SpecialFunctions.GammaLowerRegularized(a, x)));
+        }
+
+        [TestMethod]
+        public void GammaLowerRegularized_EdgeCases_ReturnsExpectedResults()
+        {
+            // Arrange
+            double a = 0.0;
+            double x = 0.0;
+
+            // Act
+            double result = SpecialFunctions.GammaLowerRegularized(a, x);
+
+            // Assert
+            Assert.IsTrue(result.AlmostEqual(1.0));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        public void GammaLowerRegularized_InvalidArgument_ThrowsException()
+        {
+            // Arrange
+            double a = -1.0;
+            double x = 0.0;
+
+            // Act
+            SpecialFunctions.GammaLowerRegularized(a, x);
+        }
+
+        [TestMethod]
+        public void GammaLowerRegularized_InvalidInput_ThrowsException()
+        {
+            // Arrange
+            double a = double.NaN;
+            double x = 0.0;
+
+            // Act and Assert
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => SpecialFunctions.GammaLowerRegularized(a, x));
+        }
+    }
+}
+
+
+Error Messages:
+Here are the error messages reported by the IDE:
+Severity	Code	Description	Line	Details
+Error (active)	CS0234	The type or namespace name 'Specifications' does not exist in the namespace 'MathNet.Numerics' (are you missing an assembly reference?)	3	
+
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the GammaLowerRegularized method from the SpecialFunctions class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+using System;
+
+namespace MathNet.Numerics
+{
+    public static partial class SpecialFunctions
+    {
+        /// <summary>
+        /// Returns the lower incomplete regularized gamma function
+        /// P(a,x) = 1/Gamma(a) * int(exp(-t)t^(a-1),t=0..x) for real a &gt; 0, x &gt; 0.
+        /// </summary>
+        /// <param name="a">The argument for the gamma function.</param>
+        /// <param name="x">The upper integral limit.</param>
+        /// <returns>The lower incomplete gamma function.</returns>
+        public static double GammaLowerRegularized(double a, double x)
+        {
+            const double epsilon = 0.000000000000001;
+            const double big = 4503599627370496.0;
+            const double bigInv = 2.22044604925031308085e-16;
+
+            if (a < 0d)
+            {
+                throw new ArgumentOutOfRangeException(nameof(a), "Value must not be negative (zero is ok).");
+            }
+
+            if (x < 0d)
+            {
+                throw new ArgumentOutOfRangeException(nameof(x), "Value must not be negative (zero is ok).");
+            }
+
+            if (a.AlmostEqual(0.0))
+            {
+                if (x.AlmostEqual(0.0))
+                {
+                    //use right hand limit value because so that regularized upper/lower gamma definition holds.
+                    return 1d;
+                }
+
+                return 1d;
+            }
+
+            if (x.AlmostEqual(0.0))
+            {
+                return 0d;
+            }
+
+            double ax = (a*Math.Log(x)) - x - GammaLn(a);
+            if (ax < -709.78271289338399)
+            {
+                return a < x ? 1d : 0d;
+            }
+
+            if (x <= 1 || x <= a)
+            {
+                double r2 = a;
+                double c2 = 1;
+                double ans2 = 1;
+
+                do
+                {
+                    r2 = r2 + 1;
+                    c2 = c2*x/r2;
+                    ans2 += c2;
+                }
+                while ((c2/ans2) > epsilon);
+
+                return Math.Exp(ax)*ans2/a;
+            }
+
+            int c = 0;
+            double y = 1 - a;
+            double z = x + y + 1;
+
+            double p3 = 1;
+            double q3 = x;
+            double p2 = x + 1;
+            double q2 = z*x;
+            double ans = p2/q2;
+
+            double error;
+
+            do
+            {
+                c++;
+                y += 1;
+                z += 2;
+                double yc = y*c;
+
+                double p = (p2*z) - (p3*yc);
+                double q = (q2*z) - (q3*yc);
+
+                if (q != 0)
+                {
+                    double nextans = p/q;
+                    error = Math.Abs((ans - nextans)/nextans);
+                    ans = nextans;
+                }
+                else
+                {
+                    // zero div, skip
+                    error = 1;
+                }
+
+                // shift
+                p3 = p2;
+                p2 = p;
+                q3 = q2;
+                q2 = q;
+
+                // normalize fraction when the numerator becomes large
+                if (Math.Abs(p) > big)
+                {
+                    p3 *= bigInv;
+                    p2 *= bigInv;
+                    q3 *= bigInv;
+                    q2 *= bigInv;
+                }
+            }
+            while (error > epsilon);
+
+            return 1d - (Math.Exp(ax)*ans);
+        }
+	}
+}
+
+Here are additional project-specific details referenced in the method:
+
+GammaLn: Computes the logarithm of the Gamma function.
+- namespace: MathNet.Numerics.SpecialFunctions
+- method signature: public static double GammaLn(double z)
+- param z: The argument of the gamma function.
+- returns: The logarithm of the gamma function.
+- info: Our unit tests suggest that the accuracy of the Gamma function is correct up to 14 floating point digits.
+
+

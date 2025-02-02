@@ -1,0 +1,177 @@
+The generated MSTest test does not compile. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test class that does not compile:
+using Humanizer;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace Humanizer.Test;
+
+[TestClass]
+public class CasingExtensionsTests {
+    [TestMethod]
+    public void TestApplyCase_Title() {
+        // Arrange
+        var input = "some string";
+        var expected = "Some String";
+
+        // Act
+        var result = input.ApplyCase(LetterCasing.Title);
+
+        // Assert
+        Assert.AreEqual(expected, result);
+    }
+
+    [TestMethod]
+    public void TestApplyCase_AllCaps() {
+        // Arrange
+        var input = "some string";
+        var expected = "SOME STRING";
+
+        // Act
+        var result = input.ApplyCase(LetterCasing.AllCaps);
+
+        // Assert
+        Assert.AreEqual(expected, result);
+    }
+
+    [TestMethod]
+    public void TestApplyCase_LowerCase() {
+        // Arrange
+        var input = "Some String";
+        var expected = "some string";
+
+        // Act
+        var result = input.ApplyCase(LetterCasing.LowerCase);
+
+        // Assert
+        Assert.AreEqual(expected, result);
+    }
+
+    [TestMethod]
+    public void TestApplyCase_Sentence() {
+        // Arrange
+        var input = "some string";
+        var expected = "Some string";
+
+        // Act
+        var result = input.ApplyCase(LetterCasing.Sentence);
+
+        // Assert
+        Assert.AreEqual(expected, result);
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(ArgumentOutOfRangeException))]
+    public void TestApplyCase_InvalidCasing() {
+        // Arrange
+        var input = "some string";
+        var expected = "some string";
+
+        // Act
+        var result = input.ApplyCase((LetterCasing)100);
+    }
+
+    [TestMethod]
+    public void TestApplyCase_NullInput() {
+        // Arrange
+        var input = null as string;
+        var expected = null;
+
+        // Act
+        if (input != null) {
+            var result = input.ApplyCase(LetterCasing.Title);
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+        else {
+            Assert.IsNull(expected);
+        }
+    }
+
+    [TestMethod]
+    public void TestApplyCase_EmptyInput() {
+        // Arrange
+        var input = string.Empty;
+        var expected = string.Empty;
+
+        // Act
+        if (!string.IsNullOrEmpty(input)) {
+            var result = input.ApplyCase(LetterCasing.Title);
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+        else {
+            Assert.AreEqual(expected, input);
+        }
+    }
+}
+
+Error Messages:
+Here are the error messages reported by the IDE:
+Severity	Code	Description	Line	Details
+Error (active)	CS0815	Cannot assign <null> to an implicitly-typed variable	75	
+
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the ApplyCase method from the CasingExtensions class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+namespace Humanizer;
+
+/// <summary>
+/// ApplyCase method to allow changing the case of a sentence easily
+/// </summary>
+public static class CasingExtensions
+{
+    /// <summary>
+    /// Changes the casing of the provided input
+    /// </summary>
+    public static string ApplyCase(this string input, LetterCasing casing) =>
+        casing switch
+        {
+            LetterCasing.Title => input.Transform(To.TitleCase),
+            LetterCasing.LowerCase => input.Transform(To.LowerCase),
+            LetterCasing.AllCaps => input.Transform(To.UpperCase),
+            LetterCasing.Sentence => input.Transform(To.SentenceCase),
+            _ => throw new ArgumentOutOfRangeException(nameof(casing))
+        };
+}
+
+Here are additional project-specific details referenced in the method:
+
+(public)LetterCasing: Options for specifying the desired letter casing for the output string
+- Namespace: Humanizer
+- Values:
+- Title: SomeString → Some String
+- AllCaps: SomeString → SOME STRING
+- LowerCase: SomeString → some string
+- Sentence: SomeString → Some string
+
+Transform: Transforms a string using the provided transformers. Transformations are applied in the provided order
+- Namespace: Humanizer
+- Method Signature: public static string Transform(this string input, params IStringTransformer[] transformers)
+- Class: belongs to pubic static Class To
+
+TitleCase: Changes a string to title case:
+- Namespace: Humanizer
+- Part of: To
+- Example: "INvalid caSEs arE corrected" → "Invalid Cases Are Corrected"
+
+UpperCase: Changes a string to upper case
+- Namespace: Humanizer
+- Part of: To
+- Example: "lower case statement" → "LOWER CASE STATEMENT"
+
+LowerCase: Changes a string to lower case
+- Namespace: Humanizer
+- Part of: To
+- Example: "Sentence casing" → "sentence casing"
+
+SentenceCase: Changes a string to sentence case
+- Namespace: Humanizer
+- Part of: To
+- Example: "lower case statement" → "Lower case statement"
+
+

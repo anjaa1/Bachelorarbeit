@@ -1,0 +1,155 @@
+The generated MSTest test does not compile. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test class that does not compile:
+using Humanizer;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Linq;
+
+namespace HumanizerTests {
+    [TestClass]
+    public class EnglishArticleTests {
+        [TestMethod]
+        public void PrependArticleSuffix_Typical_SingleElementArray_ReturnsPrependedArticle() {
+            // Arrange
+            var appended = new string[] { "The apple" };
+
+            // Act
+            var result = EnglishArticle.PrependArticleSuffix(appended);
+
+            // Assert
+            Assert.AreEqual(1, result.Length);
+            Assert.AreEqual("apple The", result[0]);
+        }
+
+        [TestMethod]
+        public void PrependArticleSuffix_Typical_MultipleElementArray_ReturnsPrependedArticle() {
+            // Arrange
+            var appended = new string[] { "The apple", "an orange", "a banana" };
+
+            // Act
+            var result = EnglishArticle.PrependArticleSuffix(appended);
+
+            // Assert
+            Assert.AreEqual(3, result.Length);
+            Assert.AreEqual("apple The", result[0]);
+            Assert.AreEqual("orange an", result[1]);
+            Assert.AreEqual("banana a", result[2]);
+        }
+
+        [TestMethod]
+        public void PrependArticleSuffix_EdgeCase_NoArticle_ReturnsOriginal() {
+            // Arrange
+            var appended = new string[] { "apple" };
+
+            // Act
+            var result = EnglishArticle.PrependArticleSuffix(appended);
+
+            // Assert
+            Assert.AreEqual(1, result.Length);
+            Assert.AreEqual("apple", result[0]);
+        }
+
+        [TestMethod]
+        public void PrependArticleSuffix_EdgeCase_InvalidArticle_ReturnsOriginal() {
+            // Arrange
+            var appended = new string[] { "Invalid apple" };
+
+            // Act
+            var result = EnglishArticle.PrependArticleSuffix(appended);
+
+            // Assert
+            Assert.AreEqual(1, result.Length);
+            Assert.AreEqual("Invalid apple", result[0]);
+        }
+
+        [TestMethod]
+        public void PrependArticleSuffix_EdgeCase_NullArray_ReturnsEmptyArray() {
+            // Arrange
+            var appended = null;
+
+            // Act
+            var result = EnglishArticle.PrependArticleSuffix(appended);
+
+            // Assert
+            Assert.AreEqual(0, result.Length);
+        }
+
+        [TestMethod]
+        public void PrependArticleSuffix_EdgeCase_EmptyArray_ReturnsEmptyArray() {
+            // Arrange
+            var appended = new string[0];
+
+            // Act
+            var result = EnglishArticle.PrependArticleSuffix(appended);
+
+            // Assert
+            Assert.AreEqual(0, result.Length);
+        }
+    }
+}
+Error Messages:
+Here are the error messages reported by the IDE:
+Severity	Code	Description	Line	Details
+Error (active)	CS0815	Cannot assign <null> to an implicitly-typed variable	66	
+
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the PrependArticleSuffix method from the EnglishArticle class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+namespace Humanizer;
+
+/// <summary>
+/// Contains methods for removing, appending and prepending article prefixes for sorting strings ignoring the article.
+/// </summary>
+public static class EnglishArticle
+{
+    static readonly Regex _regex = new("^((The)|(the)|(a)|(A)|(An)|(an))\\s\\w+", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Removes the previously appended article and prepends it to the same string.
+    /// </summary>
+    /// <param name="appended">Sorted string array</param>
+    /// <returns>String array</returns>
+    public static string[] PrependArticleSuffix(string[] appended)
+    {
+        var inserted = new string[appended.Length];
+        var the = " the".AsSpan();
+        var an = " an".AsSpan();
+        var a = " a".AsSpan();
+
+        for (var i = 0; i < appended.Length; i++)
+        {
+            var append = appended[i]
+                .AsSpan();
+            if (append.EndsWith(the, StringComparison.OrdinalIgnoreCase))
+            {
+                inserted[i] = ToOriginalFormat(append, 3);
+            }
+            else if (append.EndsWith(an, StringComparison.OrdinalIgnoreCase))
+            {
+                inserted[i] = ToOriginalFormat(append, 2);
+            }
+            else if (append.EndsWith(a, StringComparison.OrdinalIgnoreCase))
+            {
+                inserted[i] = ToOriginalFormat(append, 1);
+            }
+            else
+            {
+                inserted[i] = appended[i];
+            }
+        }
+
+        return inserted;
+    }
+}
+
+Here are additional project-specific details referenced in the method:
+
+ToOriginalFormat: static string ToOriginalFormat(CharSpan value, int suffixLength) =>
+        $"{value[^suffixLength..]} {value[..^(suffixLength + 1)]}"; --> Is Part of EnglishArticle Class
+

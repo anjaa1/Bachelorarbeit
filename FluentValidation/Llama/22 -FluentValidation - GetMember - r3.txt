@@ -1,0 +1,194 @@
+The generated MSTest test does not compile. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test class that does not compile:
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Linq.Expressions;
+using System.Reflection;
+
+namespace FluentValidation.Tests.Extensions {
+	[TestClass]
+	public class ExtensionsTests {
+		[TestMethod]
+		public void GetMember_TypicalUsage_ReturnsMemberInfo() {
+			// Arrange
+			var model = new TestModel();
+			var expression = (Func<TestModel, string>)x => x.Name;
+
+			// Act
+			var result = Extensions.GetMember(expression);
+
+			// Assert
+			Assert.IsNotNull(result);
+			Assert.AreEqual(typeof(TestModel).GetProperty("Name"), result);
+		}
+
+		[TestMethod]
+		public void GetMember_NullExpression_ReturnsNull() {
+			// Act
+			var result = Extensions.GetMember(null);
+
+			// Assert
+			Assert.IsNull(result);
+		}
+
+		[TestMethod]
+		public void GetMember_ExpressionWithInvalidMember_ReturnsNull() {
+			// Arrange
+			var model = new TestModel();
+			var expression = (Func<TestModel, string>)x => x.NonExistingProperty;
+
+			// Act
+			var result = Extensions.GetMember(expression);
+
+			// Assert
+			Assert.IsNull(result);
+		}
+
+		[TestMethod]
+		public void GetMember_ExpressionWithNestedMember_ReturnsMemberInfo() {
+			// Arrange
+			var model = new NestedModel();
+			var expression = (Func<NestedModel, string>)x => x.Nested.Name;
+
+			// Act
+			var result = Extensions.GetMember(expression);
+
+			// Assert
+			Assert.IsNotNull(result);
+			Assert.AreEqual(typeof(NestedModel).GetProperty("Nested").GetProperty("Name"), result);
+		}
+
+		[TestMethod]
+		public void GetMember_ExpressionWithParameterNotMemberAccess_ReturnsNull() {
+			// Arrange
+			var model = new TestModel();
+			var expression = (Func<TestModel, string>)x => x.ToString();
+
+			// Act
+			var result = Extensions.GetMember(expression);
+
+			// Assert
+			Assert.IsNull(result);
+		}
+
+		[TestMethod]
+		public void GetMember_ExpressionWithParameterNotMemberAccessButUnaryOperation_ReturnsNull() {
+			// Arrange
+			var model = new TestModel();
+			var expression = (Func<TestModel, string>)x => (string)x;
+
+			// Act
+			var result = Extensions.GetMember(expression);
+
+			// Assert
+			Assert.IsNull(result);
+		}
+
+		[TestMethod]
+		public void GetMember_ExpressionWithParameterNotMemberAccessButUnaryOperationAndMemberAccess_ReturnsMemberInfo() {
+			// Arrange
+			var model = new TestModel();
+			var expression = (Func<TestModel, string>)x => ((string)x).Name;
+
+			// Act
+			var result = Extensions.GetMember(expression);
+
+			// Assert
+			Assert.IsNotNull(result);
+			Assert.AreEqual(typeof(TestModel).GetProperty("Name"), result);
+		}
+	}
+
+	public class TestModel {
+		public string Name { get; set; }
+	}
+
+	public class NestedModel {
+		public Nested Nested { get; set; }
+	}
+
+	public class Nested {
+		public string Name { get; set; }
+	}
+	public static class Extensions {
+		public static Expression RemoveUnary(this Expression expression) {
+			if (expression == null) {
+				return null;
+			}
+
+			if (expression.NodeType == ExpressionType.UnaryPlus || expression.NodeType == ExpressionType.Convert) {
+				return ((UnaryExpression)expression).Operand;
+			}
+
+			return expression;
+		}
+	}
+
+
+Error Messages:
+Here are the error messages reported by the IDE:
+Severity	Code	Description	Line	Details
+Error (active)	CS1003	Syntax error, ',' expected	76	
+Error (active)	CS1003	Syntax error, ',' expected	13	
+Error (active)	CS1002	; expected	13	
+Error (active)	CS1003	Syntax error, ',' expected	36	
+Error (active)	CS1002	; expected	36	
+Error (active)	CS1003	Syntax error, ',' expected	49	
+Error (active)	CS1002	; expected	49	
+Error (active)	CS1003	Syntax error, ',' expected	63	
+Error (active)	CS1002	; expected	63	
+Error (active)	CS1002	; expected	76	
+Error (active)	CS1003	Syntax error, ',' expected	89	
+Error (active)	CS1002	; expected	89	
+Error (active)	CS1513	} expected	123	
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the GetMember method from the Extensions class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+namespace FluentValidation.Internal;
+
+using System;
+using System.Linq.Expressions;
+using System.Reflection;
+
+/// <summary>
+/// Useful extensions
+/// </summary>
+public static class Extensions {
+
+	/// <summary>
+	/// Gets a MemberInfo from a member expression.
+	/// </summary>
+	public static MemberInfo GetMember<T, TProperty>(this Expression<Func<T, TProperty>> expression) {
+		var memberExp = RemoveUnary(expression.Body) as MemberExpression;
+
+		if (memberExp == null) {
+			return null;
+		}
+
+		Expression currentExpr = memberExp.Expression;
+
+		// Unwind the expression to get the root object that the expression acts upon.
+		while (true) {
+			currentExpr = RemoveUnary(currentExpr);
+
+			if (currentExpr != null && currentExpr.NodeType == ExpressionType.MemberAccess) {
+				currentExpr = ((MemberExpression)currentExpr).Expression;
+			} else {
+				break;
+			}
+		}
+
+		if (currentExpr == null || currentExpr.NodeType != ExpressionType.Parameter) {
+			return null; // We don't care if we're not acting upon the model instance.
+		}
+
+		return memberExp.Member;
+	}
+}
+

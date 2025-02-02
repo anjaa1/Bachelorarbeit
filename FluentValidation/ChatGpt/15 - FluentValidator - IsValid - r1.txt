@@ -1,0 +1,183 @@
+The generated MSTest test compiles but fails during execution. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test that does not compile:
+using System;
+using FluentValidation.Validators;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace ScalePrecisionValidatorTests {
+	[TestClass]
+	public class ScalePrecisionValidatorTests {
+		[TestMethod]
+		public void IsValid_DecimalExceedsScale_ReturnsFalse() {
+			// Arrange
+			var validator = new ScalePrecisionValidator<object>(scale: 2, precision: 5);
+			var decimalValue = 123.456m; // Scale exceeds 2
+
+			// Act
+			var isValid = validator.IsValid(null, decimalValue);
+
+			// Assert
+			Assert.IsFalse(isValid, "Expected the method to return false for a decimal value exceeding the scale.");
+		}
+		Here are the error messages reported by the IDE:
+		Test method ScalePrecisionValidatorTests.ScalePrecisionValidatorTests.IsValid_DecimalExceedsScale_ReturnsFalse threw exception: 
+System.NullReferenceException: Object reference not set to an instance of an object.
+
+		[TestMethod]
+		public void IsValid_DecimalExceedsPrecision_ReturnsFalse() {
+			// Arrange
+			var validator = new ScalePrecisionValidator<object>(scale: 2, precision: 5);
+			var decimalValue = 12345.67m; // Precision exceeds 5
+
+			// Act
+			var isValid = validator.IsValid(null, decimalValue);
+
+			// Assert
+			Assert.IsFalse(isValid, "Expected the method to return false for a decimal value exceeding the precision.");
+		}
+		Here are the error messages reported by the IDE:
+		 Test method ScalePrecisionValidatorTests.ScalePrecisionValidatorTests.IsValid_DecimalExceedsPrecision_ReturnsFalse threw exception: 
+System.NullReferenceException: Object reference not set to an instance of an object.
+}}
+
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the IsValid method from the ScalePrecisionValidator class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+namespace FluentValidation.Validators;
+
+using System;
+
+/// <summary>
+/// Allows a decimal to be validated for scale and precision.
+/// Scale would be the number of digits to the right of the decimal point.
+/// Precision would be the number of digits. This number includes both the left and the right sides of the decimal point.
+///
+/// It implies certain range of values that will be accepted by the validator.
+/// It permits up to Precision - Scale digits to the left of the decimal point and up to Scale digits to the right.
+///
+/// It can be configured to use the effective scale and precision
+/// (i.e. ignore trailing zeros) if required.
+///
+/// 123.4500 has an scale of 4 and a precision of 7, but an effective scale
+/// and precision of 2 and 5 respectively.
+/// </summary>
+public class ScalePrecisionValidator<T> : PropertyValidator<T, decimal> {
+
+	// TODO: For 12.0 swap the parameter order to match the PrecisionScale extension methods and add parameter for IgnoreTrailingZeros.
+	public ScalePrecisionValidator(int scale, int precision) {
+		Init(scale, precision);
+	}
+
+	public override string Name => "ScalePrecisionValidator";
+
+	public int Scale { get; set; }
+
+	public int Precision { get; set; }
+
+	public bool IgnoreTrailingZeros { get; set; }
+
+	public override bool IsValid(ValidationContext<T> context, decimal decimalValue) {
+		var scale = GetScale(decimalValue);
+		var precision = GetPrecision(decimalValue);
+		var actualIntegerDigits = precision - scale;
+		var expectedIntegerDigits = Precision - Scale;
+		if (scale > Scale || actualIntegerDigits > expectedIntegerDigits) {
+			// Precision and scale alone may not be enough to describe why a value is invalid.
+			// For example, given an expected precision of 3 and scale of 2, the value "123" is invalid, even though precision
+			// is 3 and scale is 0. So as a workaround we can provide actual precision and scale as if value
+			// was "right-padded" with zeros to the amount of expected decimals, so that it would look like
+			// complement zeros were added in the decimal part for calculation of precision. In the above
+			// example actual precision and scale would be printed as 5 and 2 as if value was 123.00.
+			var printedActualScale = Math.Max(scale, Scale);
+			var printedActualPrecision = Math.Max(actualIntegerDigits, 1) + printedActualScale;
+
+			context.MessageFormatter
+				.AppendArgument("ExpectedPrecision", Precision)
+				.AppendArgument("ExpectedScale", Scale)
+				.AppendArgument("Digits", printedActualPrecision)
+				.AppendArgument("ActualScale", printedActualScale);
+
+			return false;
+		}
+		return true;
+	}
+}
+
+Here are additional project-specific details referenced in the method:
+
+	private void Init(int scale, int precision) {
+		Scale = scale;
+		Precision = precision;
+
+		if (Scale < 0)
+			throw new ArgumentOutOfRangeException(
+				nameof(scale), $"Scale must be a positive integer. [value:{Scale}].");
+		if (Precision < 0)
+			throw new ArgumentOutOfRangeException(
+				nameof(precision), $"Precision must be a positive integer. [value:{Precision}].");
+		if (Precision < Scale)
+			throw new ArgumentOutOfRangeException(
+				nameof(scale),
+				$"Scale must be less than precision. [scale:{Scale}, precision:{Precision}].");
+	}
+
+	private static UInt32[] GetBits(decimal Decimal) {
+		// We want the integer parts as uint
+		// C# doesn't permit int[] to uint[] conversion, but .NET does. This is somewhat evil...
+		return (uint[])(object)decimal.GetBits(Decimal);
+	}
+
+	private static decimal GetMantissa(decimal Decimal) {
+		var bits = GetBits(Decimal);
+		return (bits[2] * 4294967296m * 4294967296m) + (bits[1] * 4294967296m) + bits[0];
+	}
+
+	private static uint GetUnsignedScale(decimal Decimal) {
+		var bits = GetBits(Decimal);
+		uint scale = (bits[3] >> 16) & 31;
+		return scale;
+	}
+
+	private int GetScale(decimal Decimal) {
+		uint scale = GetUnsignedScale(Decimal);
+		if (IgnoreTrailingZeros) {
+			return (int)(scale - NumTrailingZeros(Decimal));
+		}
+
+		return (int)scale;
+	}
+
+	private static uint NumTrailingZeros(decimal Decimal) {
+		uint trailingZeros = 0;
+		uint scale = GetUnsignedScale(Decimal);
+		for (decimal tmp = GetMantissa(Decimal); tmp % 10m == 0 && trailingZeros < scale; tmp /= 10) {
+			trailingZeros++;
+		}
+
+		return trailingZeros;
+	}
+
+	private int GetPrecision(decimal Decimal) {
+		// Precision: number of times we can divide by 10 before we get to 0
+		uint precision = 0;
+		for (decimal tmp = GetMantissa(Decimal); tmp >= 1; tmp /= 10) {
+			precision++;
+		}
+
+		if (IgnoreTrailingZeros) {
+			return (int)(precision - NumTrailingZeros(Decimal));
+		}
+
+		return (int)precision;
+	}
+
+	protected override string GetDefaultMessageTemplate(string errorCode) {
+		return Localized(errorCode, Name);
+	}
+}

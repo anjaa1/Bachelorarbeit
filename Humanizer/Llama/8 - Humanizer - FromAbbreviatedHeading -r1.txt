@@ -1,0 +1,160 @@
+The generated MSTest test does not compile. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test class that does not compile:
+using Humanizer;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Globalization;
+
+namespace HumanizerTests {
+    [TestClass]
+    public class HeadingExtensionsTests {
+        [TestMethod]
+        public void FromAbbreviatedHeading_TypicalUsage_ReturnsCorrectHeading() {
+            // Arrange
+            var heading = "N";
+            var culture = CultureInfo.InvariantCulture;
+
+            // Act
+            var result = heading.FromAbbreviatedHeading(culture);
+
+            // Assert
+            Assert.AreEqual(0, result);
+        }
+
+        [TestMethod]
+        public void FromAbbreviatedHeading_InvalidInput_ReturnsMinusOne() {
+            // Arrange
+            var heading = "Invalid";
+            var culture = CultureInfo.InvariantCulture;
+
+            // Act
+            var result = heading.FromAbbreviatedHeading(culture);
+
+            // Assert
+            Assert.AreEqual(-1, result);
+        }
+
+        [TestMethod]
+        public void FromAbbreviatedHeading_DifferentCulture_ReturnsCorrectHeading() {
+            // Arrange
+            var heading = "N";
+            var culture = new CultureInfo("fr-FR");
+
+            // Act
+            var result = heading.FromAbbreviatedHeading(culture);
+
+            // Assert
+            Assert.AreEqual(0, result);
+        }
+
+        [TestMethod]
+        public void FromAbbreviatedHeading_EmptyString_ReturnsMinusOne() {
+            // Arrange
+            var heading = string.Empty;
+            var culture = CultureInfo.InvariantCulture;
+
+            // Act
+            var result = heading.FromAbbreviatedHeading(culture);
+
+            // Assert
+            Assert.AreEqual(-1, result);
+        }
+
+        [TestMethod]
+        public void FromAbbreviatedHeading_NullInput_ThrowsArgumentNullException() {
+            // Arrange
+            var heading = null;
+            var culture = CultureInfo.InvariantCulture;
+
+            // Act and Assert
+            Assert.ThrowsException<ArgumentNullException>(() => heading.FromAbbreviatedHeading(culture));
+        }
+
+        [TestMethod]
+        public void FromAbbreviatedHeading_DifferentCasing_ReturnsMinusOne() {
+            // Arrange
+            var heading = "n";
+            var culture = CultureInfo.InvariantCulture;
+
+            // Act
+            var result = heading.FromAbbreviatedHeading(culture);
+
+            // Assert
+            Assert.AreEqual(-1, result);
+        }
+
+        [TestMethod]
+        public void FromAbbreviatedHeading_DifferentAbbreviation_ReturnsMinusOne() {
+            // Arrange
+            var heading = "W";
+            var culture = CultureInfo.InvariantCulture;
+
+            // Act
+            var result = heading.FromAbbreviatedHeading(culture);
+
+            // Assert
+            Assert.AreEqual(-1, result);
+        }
+    }
+}
+
+Error Messages:
+Here are the error messages reported by the IDE:
+Severity	Code	Description	Line	Details
+Error (active)	CS0815	Cannot assign <null> to an implicitly-typed variable	64	
+
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the FromAbbreviatedHeading method from the HeadingExtensions class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+namespace Humanizer;
+/// <summary>
+/// Contains extensions to transform a number indicating a heading into the
+/// textual representation of the heading.
+/// </summary>
+public static class HeadingExtensions
+{
+    internal static readonly string[] Headings = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
+    internal static readonly string[] HeadingsShort = ["N_Short", "NNE_Short", "NE_Short", "ENE_Short", "E_Short", "ESE_Short", "SE_Short", "SSE_Short", "S_Short", "SSW_Short", "SW_Short", "WSW_Short", "W_Short", "WNW_Short", "NW_Short", "NNW_Short"];
+    internal static readonly char[] HeadingArrows = ['↑', '↗', '→', '↘', '↓', '↙', '←', '↖'];
+    /// <summary>
+    /// Returns a heading based on the short textual representation of the heading.
+    /// </summary>
+    /// <param name="heading">The short textual representation of a heading</param>
+    /// <param name="culture">The culture of the heading</param>
+    /// <returns>The heading. -1 if the heading could not be parsed.</returns>
+    public static double FromAbbreviatedHeading(this string heading, CultureInfo? culture = null)
+    {
+        if (heading == null)
+        {
+            throw new ArgumentNullException(nameof(heading));
+        }
+
+        culture ??= CultureInfo.CurrentCulture;
+
+        var upperCaseHeading = culture.TextInfo.ToUpper(heading);
+        for (var index = 0; index < HeadingsShort.Length; ++index)
+        {
+            var localizedShortHeading = Resources.GetResource(HeadingsShort[index], culture);
+            if (culture.CompareInfo.Compare(upperCaseHeading, localizedShortHeading) == 0)
+            {
+                return index * 22.5;
+            }
+        }
+
+        return -1;
+    }
+}
+
+Here are additional project-specific details referenced in the method:
+GetResource: Returns the value of the specified string resource
+- Method Signature: public static string GetResource(string resourceKey, CultureInfo? culture = null)
+- namespace: Humanizer
+- returns: The value of the resource localized for the specified culture.
+- param culture: The culture of the resource to retrieve. If not specified, current thread's UI culture is used.
+-param resourceKey: The name of the resource to retrieve.
+

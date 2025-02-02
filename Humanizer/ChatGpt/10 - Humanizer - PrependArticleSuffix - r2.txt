@@ -1,0 +1,104 @@
+The generated MSTest test compiles but fails during execution. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test that does not compile:
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using Humanizer;
+
+namespace Humanizer.Tests
+{
+    [TestClass]
+    public class EnglishArticleTests
+    {
+        [TestMethod]
+        public void PrependArticleSuffix_WithValidInput_ReturnsCorrectResult()
+        {
+            // Arrange
+            string[] input = { "Dog the", "Apple an", "Book a" };
+            string[] expected = { "The Dog", "An Apple", "A Book" };
+
+            // Act
+            string[] result = EnglishArticle.PrependArticleSuffix(input);
+
+            // Assert
+            CollectionAssert.AreEqual(expected, result);
+        }
+		Here are the error messages reported by the IDE:
+		CollectionAssert.AreEqual failed. (Element at index 0 do not match.)
+		
+        [TestMethod]
+        public void PrependArticleSuffix_WithNullInput_ThrowsArgumentNullException()
+        {
+            // Arrange
+            string[] input = null!;
+
+            // Act & Assert
+            Assert.ThrowsException<ArgumentNullException>(() => EnglishArticle.PrependArticleSuffix(input));
+        }
+		Here are the error messages reported by the IDE:
+		Assert.ThrowsException failed. Threw exception NullReferenceException, but exception ArgumentNullException was expected. 
+Exception Message: Object reference not set to an instance of an object.
+}}
+
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the PrependArticleSuffix method from the EnglishArticle class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+namespace Humanizer;
+
+/// <summary>
+/// Contains methods for removing, appending and prepending article prefixes for sorting strings ignoring the article.
+/// </summary>
+public static class EnglishArticle
+{
+    static readonly Regex _regex = new("^((The)|(the)|(a)|(A)|(An)|(an))\\s\\w+", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Removes the previously appended article and prepends it to the same string.
+    /// </summary>
+    /// <param name="appended">Sorted string array</param>
+    /// <returns>String array</returns>
+    public static string[] PrependArticleSuffix(string[] appended)
+    {
+        var inserted = new string[appended.Length];
+        var the = " the".AsSpan();
+        var an = " an".AsSpan();
+        var a = " a".AsSpan();
+
+        for (var i = 0; i < appended.Length; i++)
+        {
+            var append = appended[i]
+                .AsSpan();
+            if (append.EndsWith(the, StringComparison.OrdinalIgnoreCase))
+            {
+                inserted[i] = ToOriginalFormat(append, 3);
+            }
+            else if (append.EndsWith(an, StringComparison.OrdinalIgnoreCase))
+            {
+                inserted[i] = ToOriginalFormat(append, 2);
+            }
+            else if (append.EndsWith(a, StringComparison.OrdinalIgnoreCase))
+            {
+                inserted[i] = ToOriginalFormat(append, 1);
+            }
+            else
+            {
+                inserted[i] = appended[i];
+            }
+        }
+
+        return inserted;
+    }
+}
+
+Here are additional project-specific details referenced in the method:
+
+ToOriginalFormat: static string ToOriginalFormat(CharSpan value, int suffixLength) =>
+        $"{value[^suffixLength..]} {value[..^(suffixLength + 1)]}"; --> Is Part of EnglishArticle Class
+
+

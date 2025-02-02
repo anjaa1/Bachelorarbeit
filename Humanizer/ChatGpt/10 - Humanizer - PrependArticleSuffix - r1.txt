@@ -1,0 +1,191 @@
+The generated MSTest test does not compile. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test class that does not compile:
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using Humanizer;
+
+namespace Humanizer.Tests
+{
+    [TestClass]
+    public class EnglishArticleTests
+    {
+        [TestMethod]
+        public void PrependArticleSuffix_WithValidInput_ReturnsCorrectResult()
+        {
+            // Arrange
+            string[] input = { "Dog the", "Apple an", "Book a" };
+            string[] expected = { "The Dog", "An Apple", "A Book" };
+
+            // Act
+            string[] result = EnglishArticle.PrependArticleSuffix(input);
+
+            // Assert
+            CollectionAssert.AreEqual(expected, result);
+        }
+
+        [TestMethod]
+        public void PrependArticleSuffix_WithNoArticleSuffix_ReturnsUnchanged()
+        {
+            // Arrange
+            string[] input = { "Cat", "Orange", "Notebook" };
+            string[] expected = { "Cat", "Orange", "Notebook" };
+
+            // Act
+            string[] result = EnglishArticle.PrependArticleSuffix(input);
+
+            // Assert
+            CollectionAssert.AreEqual(expected, result);
+        }
+
+        [TestMethod]
+        public void PrependArticleSuffix_WithMixedCaseArticleSuffix_ReturnsCorrectResult()
+        {
+            // Arrange
+            string[] input = { "Dog The", "Apple An", "Book A" };
+            string[] expected = { "The Dog", "An Apple", "A Book" };
+
+            // Act
+            string[] result = EnglishArticle.PrependArticleSuffix(input);
+
+            // Assert
+            CollectionAssert.AreEqual(expected, result);
+        }
+
+        [TestMethod]
+        public void PrependArticleSuffix_WithEmptyArray_ReturnsEmptyArray()
+        {
+            // Arrange
+            string[] input = Array.Empty<string>();
+            string[] expected = Array.Empty<string>();
+
+            // Act
+            string[] result = EnglishArticle.PrependArticleSuffix(input);
+
+            // Assert
+            CollectionAssert.AreEqual(expected, result);
+        }
+
+        [TestMethod]
+        public void PrependArticleSuffix_WithNullInput_ThrowsArgumentNullException()
+        {
+            // Arrange
+            string[] input = null;
+
+            // Act & Assert
+            Assert.ThrowsException<ArgumentNullException>(() => EnglishArticle.PrependArticleSuffix(input));
+        }
+
+        [TestMethod]
+        public void PrependArticleSuffix_WithEmptyStrings_ReturnsEmptyStrings()
+        {
+            // Arrange
+            string[] input = { "", "", "" };
+            string[] expected = { "", "", "" };
+
+            // Act
+            string[] result = EnglishArticle.PrependArticleSuffix(input);
+
+            // Assert
+            CollectionAssert.AreEqual(expected, result);
+        }
+
+        [TestMethod]
+        public void PrependArticleSuffix_WithSpecialCharacters_ReturnsCorrectResult()
+        {
+            // Arrange
+            string[] input = { "@the", "#an", "&a" };
+            string[] expected = { "@the", "#an", "&a" };
+
+            // Act
+            string[] result = EnglishArticle.PrependArticleSuffix(input);
+
+            // Assert
+            CollectionAssert.AreEqual(expected, result);
+        }
+
+        [TestMethod]
+        public void PrependArticleSuffix_WithWhitespaceOnly_ReturnsWhitespaceOnly()
+        {
+            // Arrange
+            string[] input = { " ", "  ", "   " };
+            string[] expected = { " ", "  ", "   " };
+
+            // Act
+            string[] result = EnglishArticle.PrependArticleSuffix(input);
+
+            // Assert
+            CollectionAssert.AreEqual(expected, result);
+        }
+    }
+}
+
+
+Error Messages:
+Here are the error messages reported by the IDE:
+Severity	Code	Description	Line	Details
+Error (active)	CS8600	Converting null literal or possible null value to non-nullable type.	70	
+Error (active)	CS8600	Converting null literal or possible null value to non-nullable type.	70	
+Error (active)	CS8604	Possible null reference argument for parameter 'appended' in 'string[] EnglishArticle.PrependArticleSuffix(string[] appended)'.	73	
+Error (active)	CS8604	Possible null reference argument for parameter 'appended' in 'string[] EnglishArticle.PrependArticleSuffix(string[] appended)'.	73	
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the PrependArticleSuffix method from the EnglishArticle class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+namespace Humanizer;
+
+/// <summary>
+/// Contains methods for removing, appending and prepending article prefixes for sorting strings ignoring the article.
+/// </summary>
+public static class EnglishArticle
+{
+    static readonly Regex _regex = new("^((The)|(the)|(a)|(A)|(An)|(an))\\s\\w+", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Removes the previously appended article and prepends it to the same string.
+    /// </summary>
+    /// <param name="appended">Sorted string array</param>
+    /// <returns>String array</returns>
+    public static string[] PrependArticleSuffix(string[] appended)
+    {
+        var inserted = new string[appended.Length];
+        var the = " the".AsSpan();
+        var an = " an".AsSpan();
+        var a = " a".AsSpan();
+
+        for (var i = 0; i < appended.Length; i++)
+        {
+            var append = appended[i]
+                .AsSpan();
+            if (append.EndsWith(the, StringComparison.OrdinalIgnoreCase))
+            {
+                inserted[i] = ToOriginalFormat(append, 3);
+            }
+            else if (append.EndsWith(an, StringComparison.OrdinalIgnoreCase))
+            {
+                inserted[i] = ToOriginalFormat(append, 2);
+            }
+            else if (append.EndsWith(a, StringComparison.OrdinalIgnoreCase))
+            {
+                inserted[i] = ToOriginalFormat(append, 1);
+            }
+            else
+            {
+                inserted[i] = appended[i];
+            }
+        }
+
+        return inserted;
+    }
+}
+
+Here are additional project-specific details referenced in the method:
+
+ToOriginalFormat: static string ToOriginalFormat(CharSpan value, int suffixLength) =>
+        $"{value[^suffixLength..]} {value[..^(suffixLength + 1)]}"; --> Is Part of EnglishArticle Class
+
+

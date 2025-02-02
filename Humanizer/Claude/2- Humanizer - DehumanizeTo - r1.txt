@@ -1,0 +1,120 @@
+The generated MSTest test compiles but fails during execution. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test that does not compile:
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using Humanizer;
+
+namespace Humanizer.Tests
+{
+    [TestClass]
+    public class EnumDehumanizeExtensionsTests
+    {
+        private enum TestEnum
+        {
+            FirstValue,
+            SecondValue,
+            ThirdValue,
+            ALLCAPS,
+            MixedCASE
+        }
+        [TestMethod]
+        public void DehumanizeTo_CaseVariations_ReturnsCorrectEnum()
+        {
+            // Arrange
+            string[] inputs = {
+                "ALLCAPS",
+                "All Caps",
+                "Mixed CASE",
+                "Mixed Case"
+            };
+
+            // Act & Assert
+            foreach (var input in inputs)
+            {
+                var result = input.DehumanizeTo(typeof(TestEnum));
+                Assert.IsTrue(result.Equals(TestEnum.ALLCAPS) || result.Equals(TestEnum.MixedCASE));
+            }
+        }
+		Here are the error messages reported by the IDE:
+		 Test method Humanizer.Tests.EnumDehumanizeExtensionsTests.DehumanizeTo_CaseVariations_ReturnsCorrectEnum threw exception: 
+			Humanizer.NoMatchFoundException: Couldn't find any enum member that matches the string 'All Caps'
+			
+			
+		[TestMethod]
+       public void DehumanizeTo_WhiteSpaceHandling_ReturnsCorrectEnum()
+       {
+           // Arrange
+           string[] inputs = {
+               "First  Value",
+               "Second    Value",
+               "Third\tValue",
+               "First\nValue"
+           };
+
+           // Act & Assert
+           foreach (var input in inputs)
+           {
+               var result = input.DehumanizeTo(typeof(TestEnum));
+               Assert.IsTrue(
+                   result.Equals(TestEnum.FirstValue) ||
+                   result.Equals(TestEnum.SecondValue) ||
+                   result.Equals(TestEnum.ThirdValue)
+               );
+           }
+       }
+	   Here are the error messages reported by the IDE:
+	   Test method Humanizer.Tests.EnumDehumanizeExtensionsTests.DehumanizeTo_WhiteSpaceHandling_ReturnsCorrectEnum threw exception: 
+Humanizer.NoMatchFoundException: Couldn't find any enum member that matches the string 'First  Value'
+}}
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the DehumanizeTo method from the EnumDehumanizeExtensions class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+namespace Humanizer;
+
+/// <summary>
+/// Contains extension methods for dehumanizing Enum string values.
+/// </summary>
+public static class EnumDehumanizeExtensions
+{
+    /// <summary>
+    /// Dehumanizes a string into the Enum it was originally Humanized from!
+    /// </summary>
+    /// <param name="input">The string to be converted</param>
+    /// <param name="targetEnum">The target enum</param>
+    /// <param name="onNoMatch">What to do when input is not matched to the enum.</param>
+    /// <exception cref="NoMatchFoundException">Couldn't find any enum member that matches the string</exception>
+    /// <exception cref="ArgumentException">If targetEnum is not an enum</exception>
+#if NET6_0_OR_GREATER
+    [RequiresDynamicCode("The native code for the target enumeration might not be available at runtime.")]
+    [RequiresUnreferencedCode("The native code for the target enumeration might not be available at runtime.")]
+#endif
+    public static Enum DehumanizeTo(this string input, Type targetEnum, OnNoMatch onNoMatch = OnNoMatch.ThrowsException)
+    {
+        var genericMethod = dehumanizeToMethod.MakeGenericMethod(targetEnum);
+        try
+        {
+            return (Enum) genericMethod.Invoke(null, [input, onNoMatch])!;
+        }
+        catch (TargetInvocationException exception)
+        {
+            throw exception.InnerException!;
+        }
+    }
+}
+
+Here are additional project-specific details referenced in the method:
+OnNoMatch: An enumeration defining behavior when no match is found.
+- Namespace: Humanizer
+- Values:
+  - `ThrowsException`: Throws a `NoMatchFoundException`.
+  - `ReturnsNull`: Returns `null` instead of throwing an exception.
+dehumanizeToMethod: A static `MethodInfo` field in `EnumDehumanizeExtensions` used to create a generic method for invoking the target `DehumanizeTo` method dynamically.
+- Declaration: static readonly MethodInfo dehumanizeToMethod = typeof(EnumDehumanizeExtensions)
+      .GetMethod("DehumanizeTo", new[] { typeof(string), typeof(OnNoMatch) })!;
+

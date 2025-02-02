@@ -1,0 +1,336 @@
+The generated MSTest test does not compile. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test class that does not compile:
+using FluentValidation;
+using FluentValidation.Internal;
+using FluentValidation.TestHelper;
+using Xunit;
+
+public class MemberNameValidatorSelectorTests {
+	[Fact]
+	public void CanExecute_TypicalCase_ExecutesValidator() {
+		// Arrange
+		var memberNames = new[] { "Orders[].Name", "Orders[].Amount" };
+		var validatorSelector = new MemberNameValidatorSelector(memberNames);
+		var rule = new IncludeRule<string>(new StringLengthValidator(), _ => CascadeMode.Always);
+		var context = new ValidationContext<string>("Hello");
+
+		// Act
+		var result = validatorSelector.CanExecute(rule, "Orders[].Name", context);
+
+		// Assert
+		Assert.True(result);
+	}
+
+	[Fact]
+	public void CanExecute_InvalidMemberName_DoesNotExecuteValidator() {
+		// Arrange
+		var memberNames = new[] { "Orders[].Name", "Orders[].Amount" };
+		var validatorSelector = new MemberNameValidatorSelector(memberNames);
+		var rule = new IncludeRule<string>(new StringLengthValidator(), _ => CascadeMode.Always);
+		var context = new ValidationContext<string>("Hello");
+
+		// Act
+		var result = validatorSelector.CanExecute(rule, "Invalid.Name", context);
+
+		// Assert
+		Assert.False(result);
+	}
+
+	[Fact]
+	public void CanExecute_CollectionIndex_NormalizesPropertyPath() {
+		// Arrange
+		var memberNames = new[] { "Orders[].Name" };
+		var validatorSelector = new MemberNameValidatorSelector(memberNames);
+		var rule = new IncludeRule<string>(new StringLengthValidator(), _ => CascadeMode.Always);
+		var context = new ValidationContext<string>("Hello");
+
+		// Act
+		var result = validatorSelector.CanExecute(rule, "Orders[0].Name", context);
+
+		// Assert
+		Assert.True(result);
+	}
+
+	[Fact]
+	public void CanExecute_ChildContext_CascadeEnabled_ExecutesValidator() {
+		// Arrange
+		var memberNames = new[] { "Orders[].Name" };
+		var validatorSelector = new MemberNameValidatorSelector(memberNames);
+		var rule = new IncludeRule<string>(new StringLengthValidator(), _ => CascadeMode.Always);
+		var context = new ValidationContext<string>("Hello");
+
+		// Act
+		var result = validatorSelector.CanExecute(rule, "Orders[].Name", context);
+
+		// Assert
+		Assert.True(result);
+	}
+
+	[Fact]
+	public void CanExecute_ChildContext_CascadeDisabled_DoesNotExecuteValidator() {
+		// Arrange
+		var memberNames = new[] { "Orders[].Name" };
+		var validatorSelector = new MemberNameValidatorSelector(memberNames);
+		var rule = new IncludeRule<string>(new StringLengthValidator(), _ => CascadeMode.Always);
+		var context = new ValidationContext<string>("Hello");
+		context.RootContextData[MemberNameValidatorSelector.DisableCascadeKey] = true;
+
+		// Act
+		var result = validatorSelector.CanExecute(rule, "Orders[].Name", context);
+
+		// Assert
+		Assert.False(result);
+	}
+}
+
+
+Error Messages:
+Here are the error messages reported by the IDE:
+Severity	Code	Description	Line	Details
+Error (active)	CS0246	The type or namespace name 'Xunit' could not be found (are you missing a using directive or an assembly reference?)	4	
+Error (active)	CS0246	The type or namespace name 'FactAttribute' could not be found (are you missing a using directive or an assembly reference?)	7	
+Error (active)	CS0246	The type or namespace name 'Fact' could not be found (are you missing a using directive or an assembly reference?)	7	
+Error (active)	CS0246	The type or namespace name 'FactAttribute' could not be found (are you missing a using directive or an assembly reference?)	22	
+Error (active)	CS0246	The type or namespace name 'Fact' could not be found (are you missing a using directive or an assembly reference?)	22	
+Error (active)	CS0246	The type or namespace name 'FactAttribute' could not be found (are you missing a using directive or an assembly reference?)	37	
+Error (active)	CS0246	The type or namespace name 'Fact' could not be found (are you missing a using directive or an assembly reference?)	37	
+Error (active)	CS0246	The type or namespace name 'FactAttribute' could not be found (are you missing a using directive or an assembly reference?)	52	
+Error (active)	CS0246	The type or namespace name 'Fact' could not be found (are you missing a using directive or an assembly reference?)	52	
+Error (active)	CS0246	The type or namespace name 'FactAttribute' could not be found (are you missing a using directive or an assembly reference?)	67	
+Error (active)	CS0246	The type or namespace name 'Fact' could not be found (are you missing a using directive or an assembly reference?)	67	
+
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the CanExecute method from the MemberNameValidatorSelector class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+namespace FluentValidation.Internal;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text.RegularExpressions;
+
+/// <summary>
+/// Selects validators that are associated with a particular property.
+/// </summary>
+public class MemberNameValidatorSelector : IValidatorSelector {
+	internal const string DisableCascadeKey = "_FV_DisableSelectorCascadeForChildRules";
+	readonly IEnumerable<string> _memberNames;
+
+	// Regex for normalizing collection indicies from Orders[0].Name to Orders[].Name
+	private static Regex _collectionIndexNormalizer = new Regex(@"\[.*?\]", RegexOptions.Compiled);
+
+	/// <summary>
+	/// Creates a new instance of MemberNameValidatorSelector.
+	/// </summary>
+	public MemberNameValidatorSelector(IEnumerable<string> memberNames) {
+		_memberNames = memberNames;
+	}
+
+	/// <summary>
+	/// Member names that are validated.
+	/// </summary>
+	public IEnumerable<string> MemberNames => _memberNames;
+
+	/// <summary>
+	/// Determines whether or not a rule should execute.
+	/// </summary>
+	/// <param name="rule">The rule</param>
+	/// <param name="propertyPath">Property path (eg Customer.Address.Line1)</param>
+	/// <param name="context">Contextual information</param>
+	/// <returns>Whether or not the validator can execute.</returns>
+	public bool CanExecute (IValidationRule rule, string propertyPath, IValidationContext context) {
+		// Validator selector only applies to the top level.
+		// If we're running in a child context then this means that the child validator has already been selected
+		// Because of this, we assume that the rule should continue (ie if the parent rule is valid, all children are valid)
+		bool isChildContext = context.IsChildContext;
+		bool cascadeEnabled = !context.RootContextData.ContainsKey(DisableCascadeKey);
+
+		// If a child validator is being executed and the cascade is enabled (which is the default)
+		// then the child validator's rule should always be included.
+		// The only time this isn't the case is if the member names contained for inclusion are for child
+		// properties (which is indicated by them containing a period).
+		if (isChildContext && cascadeEnabled && !_memberNames.Any(x => x.Contains('.'))) {
+			return true;
+		}
+
+		// Rules included via Include() are always executed.
+		if (rule is IIncludeRule) {
+			return true;
+		}
+
+		// Stores the normalized property name if we're working with collection properties
+		// eg Orders[0].Name -> Orders[].Name. This is only initialized if needed (see below).
+		string normalizedPropertyPath = null;
+
+		// If the current property path is equal to any of the member names for inclusion
+		// or it's a child property path (indicated by a period) where we have a partial match.
+		foreach (var memberName in _memberNames) {
+			// If the property path is equal to any of the input member names then it should be executed.
+			if (memberName == propertyPath) {
+				return true;
+			}
+
+			// If the property path is for a child property,
+			// and the parent property is selected for inclusion,
+			// then it should be allowed to execute.
+			if (propertyPath.StartsWith(memberName + ".")) {
+				return true;
+			}
+
+			// If the property path is for a parent property,
+			// and any of its child properties are selected for inclusion
+			// then it should be allowed to execute
+			if (memberName.StartsWith(propertyPath + ".")) {
+				return true;
+			}
+
+			// If the property path is for a collection property
+			// and a child property for this collection has been passed in for inclusion.
+			// For example, memberName is "Orders[0].Amount"
+			// and propertyPath is "Orders" then it should be allowed to execute.
+			if (memberName.StartsWith(propertyPath + "[")) {
+				return true;
+			}
+
+			// If property path is for child property within collection,
+			// and member path contains wildcard [] then this means that we want to match
+			// with all items in the collection, but we need to normalize the property path
+			// in order to match. For example, if the propertyPath is "Orders[0].Name"
+			// and the memberName for inclusion is "Orders[].Name" then this should
+			// be allowed to match.
+			if (memberName.Contains("[]")) {
+				if (normalizedPropertyPath == null) {
+					// Normalize the property path using a regex. Orders[0].Name -> Orders[].Name.
+					normalizedPropertyPath = _collectionIndexNormalizer.Replace(propertyPath, "[]");
+				}
+
+				if (memberName == normalizedPropertyPath) {
+					return true;
+				}
+
+				if (memberName.StartsWith(normalizedPropertyPath + ".")) {
+					return true;
+				}
+
+				if (memberName.StartsWith(normalizedPropertyPath + "[")) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+	
+
+Here are additional project-specific details referenced in the method:
+IValidationContext
+- Namespace: FluentValidation
+- Properties:
+	- object InstanceToValidate: The object currently being validated.
+	- IDictionary<string, object> RootContextData: Additional data associated with the validation request.
+	- PropertyChain PropertyChain: Represents the chain of properties involved in validation.
+	- IValidatorSelector Selector: The selector used to choose validators.
+	- bool IsChildContext: Indicates if the context is for a child object.
+	- bool IsChildCollectionContext: Indicates if the context is for a child collection.
+	- IValidationContext ParentContext: The parent validation context.
+	- bool IsAsync: Indicates whether the validation is asynchronous.
+	- bool ThrowOnFailures: Indicates whether validation failures should throw exceptions.
+
+ValidationContext<T>
+- Namespace: FluentValidation
+- Implements: IValidationContext, IHasFailures
+- Properties:
+	- T InstanceToValidate: The object of type T being validated.
+	- IDictionary<string, object> RootContextData: Additional contextual data for the validation process.
+	- PropertyChain PropertyChain: Represents the chain of properties involved in validation.
+	- IValidatorSelector Selector: Specifies which validators should execute.
+	- bool IsChildContext: Indicates if this context is for a child object.
+	- bool IsChildCollectionContext: Indicates if this context is for a child collection.
+	- bool IsAsync: Indicates if the context is asynchronous.
+	- bool ThrowOnFailures: Determines if an exception is thrown on validation failures (default is false).
+	- IValidationContext ParentContext: The parent validation context.
+	- List<ValidationFailure> Failures: List of validation failures encountered during processing.
+	- string DisplayName: The display name for the property being validated.
+	- string PropertyPath: The full path of the current property being validated (including parent paths for child validators).
+	- string RawPropertyName: The unprocessed property name.
+	- Dictionary<string, Dictionary<T, bool>> SharedConditionCache: Caches shared condition results for optimized validation.
+- Constructors:
+	- ValidationContext<T>(T instanceToValidate): Creates a new validation context with default selectors and property chain.
+	- ValidationContext<T>(T instanceToValidate, PropertyChain propertyChain, IValidatorSelector selector): Initializes with a custom property chain and selector.
+	- Internal constructors support advanced configuration, including caching and parent-child relationships.
+- Methods:
+	- static ValidationContext<T> CreateWithOptions(T instanceToValidate, Action<ValidationStrategy<T>> options): Creates a validation context with custom options.
+	- static ValidationContext<T> GetFromNonGenericContext(IValidationContext context): Converts a non-generic IValidationContext to a ValidationContext<T>.
+	- ValidationContext<TChild> CloneForChildValidator<TChild>(TChild instanceToValidate, bool preserveParentContext, IValidatorSelector selector): Clones the context for validating a child object or collection.
+	- void AddFailure(ValidationFailure failure): Adds a validation failure.
+	- void AddFailure(string propertyName, string errorMessage): Adds a failure for a specific property.
+	- void AddFailure(string errorMessage): Adds a failure for the current property being validated.
+	- void PrepareForChildCollectionValidator(): Prepares the context for validating a child collection.
+	- void RestoreState(): Restores the previous state after child collection validation.
+	- void InitializeForPropertyValidator(string propertyPath, Func<ValidationContext<T>, string> displayNameFunc, string rawPropertyName): Initializes the context for a specific property validator.
+- Internal State Management:
+	- _sharedConditionCache: Manages cached results for conditions shared across rules.
+	- _state: A stack storing the state of the context for restoration during complex validation flows.
+	
+
+IIncludeRule
+- Namespace: FluentValidation.Internal
+- Purpose: Marker interface indicating an include rule.
+
+IncludeRule<T>
+- Namespace: FluentValidation.Internal
+-Implements: IIncludeRule
+- Key Features for Testing:
+- Extends PropertyRule<T, T>.
+Integrates a ChildValidatorAdaptor for synchronous and asynchronous validation.
+- Relevant Constructors:
+	- IncludeRule(IValidator<T> validator, Func<CascadeMode> cascadeModeThunk, Type typeToValidate): Registers a child validator and configures cascading behavior.
+	- IncludeRule(Func<ValidationContext<T>, T, IValidator<T>> func, Func<CascadeMode> cascadeModeThunk, Type typeToValidate, Type validatorType): Dynamically resolves the validator based on context.
+
+IValidationRule: Defines a rule associated with a property which can have multiple validators.
+- Namespace: FluentValidation
+- Key Properties:
+	- IEnumerable<IRuleComponent> Components: The components in this rule.
+	- string[] RuleSets: Name of the rule-set to which this rule belongs.
+	- string PropertyName: Returns the property name for the property being validated. Returns null if it is not a property being validated (eg a method call)
+	- MemberInfo Member: Property associated with this rule.
+	- Type TypeToValidate:
+	- bool HasCondition / bool HasAsyncCondition: Indicates if the rule has synchronous or asynchronous conditions.
+	- LambdaExpression Expression: Expression used to define the rule.
+	- IEnumerable<IValidationRule> DependentRules: List of rules dependent on this rule.
+- Key Method:
+- string GetDisplayName(IValidationContext context): Retrieves the display name for the property being validated, considering the provided context.
+
+public interface IRuleComponent {
+	/// <summary>
+	/// Whether or not this validator has a condition associated with it.
+	/// </summary>
+	bool HasCondition { get; }
+
+	/// <summary>
+	/// Whether or not this validator has an async condition associated with it.
+	/// </summary>
+	bool HasAsyncCondition { get; }
+
+	/// <summary>
+	/// The validator associated with this component.
+	/// </summary>
+	IPropertyValidator Validator { get; }
+
+	/// <summary>
+	/// Gets the raw unformatted error message. Placeholders will not have been rewritten.
+	/// </summary>
+	/// <returns></returns>
+	string GetUnformattedErrorMessage();
+
+	/// <summary>
+	/// The error code associated with this rule component.
+	/// </summary>
+	string ErrorCode { get; }

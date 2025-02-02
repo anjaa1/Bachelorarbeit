@@ -1,0 +1,170 @@
+The generated MSTest test does not compile. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test class that does not compile:
+using System;
+using System.Globalization;
+using Humanizer;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace Humanizer.Tests {
+    [TestClass]
+    public class DateHumanizeExtensionsTests {
+        [TestMethod]
+        public void Humanize_WithNullInput_ReturnsNever() {
+            // Arrange
+            DateTime? input = null;
+            var expected = Configurator.GetFormatter(CultureInfo.CurrentCulture).DateHumanize_Never();
+
+            // Act
+            var result = input.Humanize();
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [TestMethod]
+        public void Humanize_WithValidInput_ProvidesRelativeTimeDescription() {
+            // Arrange
+            DateTime input = DateTime.UtcNow.AddHours(-5);
+            var expected = "5 hours ago"; // Adjust this based on your formatter's output.
+
+            // Act
+            var result = input.Humanize();
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Contains("hours ago")); // General validation due to localization differences.
+        }
+
+        [TestMethod]
+        public void Humanize_WithFutureDate_HandlesCorrectly() {
+            // Arrange
+            DateTime input = DateTime.UtcNow.AddDays(3);
+            var expectedSubstring = "in 3 days"; // Adjust based on formatter.
+
+            // Act
+            var result = input.Humanize();
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Contains(expectedSubstring));
+        }
+
+        [TestMethod]
+        public void Humanize_WithSpecifiedComparisonDate_UsesComparisonDate() {
+            // Arrange
+            DateTime input = new DateTime(2023, 1, 1);
+            DateTime comparisonDate = new DateTime(2023, 1, 5);
+            var expectedSubstring = "4 days ago"; // Adjust based on formatter.
+
+            // Act
+            var result = input.Humanize(dateToCompareAgainst: comparisonDate);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Contains(expectedSubstring));
+        }
+
+        [TestMethod]
+        public void Humanize_WithUtcOption_AdjustsForTimeZoneCorrectly() {
+            // Arrange
+            DateTime input = DateTime.UtcNow.AddHours(-10);
+            var expectedSubstring = "10 hours ago"; // Adjust based on formatter.
+
+            // Act
+            var result = input.Humanize(utcDate: true);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Contains(expectedSubstring));
+        }
+
+        [TestMethod]
+        public void Humanize_WithSpecificCulture_ReturnsLocalizedResult() {
+            // Arrange
+            DateTime input = DateTime.UtcNow.AddHours(-1);
+            CultureInfo culture = new CultureInfo("fr-FR");
+            var expectedSubstring = "il y a 1 heure"; // Adjust based on formatter.
+
+            // Act
+            var result = input.Humanize(culture: culture);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Contains(expectedSubstring));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void Humanize_WithInvalidCulture_ThrowsException() {
+            // Arrange
+            DateTime input = DateTime.UtcNow;
+            CultureInfo invalidCulture = new CultureInfo("invalid-culture-code");
+
+            // Act
+            input.Humanize(culture: invalidCulture);
+
+            // Assert - Exception is expected.
+        }
+    }
+}
+
+
+Error Messages:
+Here are the error messages reported by the IDE:
+Severity	Code	Description	Line	Details
+Error (active)	CS0117	'Configurator' does not contain a definition for 'GetFormatter'	13	
+
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the Humanize method from the DateHumanizeExtensions class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+namespace Humanizer;
+
+/// <summary>
+/// Humanizes DateTime into human readable sentence
+/// </summary>
+public static class DateHumanizeExtensions
+{
+    public static string Humanize(this DateTime? input, bool? utcDate = null, DateTime? dateToCompareAgainst = null, CultureInfo? culture = null)
+    {
+        if (input.HasValue)
+        {
+            return Humanize(input.Value, utcDate, dateToCompareAgainst, culture);
+        }
+
+        return Configurator
+            .GetFormatter(culture)
+            .DateHumanize_Never();
+    }
+}
+
+Here are additional project-specific details referenced in the method:
+
+Configurator: Provides a configuration point for Humanizer
+- Namespace: Humanizer
+- Details:
+	- Regristries:
+		- CollectionFormatters: A registry of formatters used to format collections based on the current locale
+		- Formatters: Registry for string formatters based on the current locale.
+		- NumberToWordsConverters: Registry for number-to-words converters for localization.
+		- Ordinalizers: Registry for ordinalizers used in localization.
+		- DateToOrdinalWordsConverters: Registry for date-to-ordinal-word converters.
+		- DateOnlyToOrdinalWordsConverters (NET6.0+): Registry for date-only ordinal converters.
+		- TimeOnlyToClockNotationConverters (NET6.0+): Registry for time-only to clock notation converters.
+- Strategies:
+	- DateTimeHumanizeStrategy: Defines the strategy for humanizing DateTime.
+	- DateTimeOffsetHumanizeStrategy: Defines the strategy for humanizing DateTimeOffset.
+	- DateOnlyHumanizeStrategy (NET6.0+): Defines the strategy for humanizing DateOnly.
+	- TimeOnlyHumanizeStrategy (NET6.0+): Defines the strategy for humanizing TimeOnly
+- Methods:
+	- public static void UseEnumDescriptionPropertyLocator(Func<PropertyInfo, bool> func): Sets a predicate for locating description properties for enums.
+
+Humanize: Turns the current or provided date into human readable sentence
+- returns: distance of time in words
+- method signature: public static string Humanize(this DateTime input, bool? utcDate = null, DateTime? dateToCompareAgainst = null, CultureInfo? culture = null)
+

@@ -1,0 +1,183 @@
+The generated MSTest test does not compile. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test class that does not compile:
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using FluentValidation.Internal;
+using System.Collections.Generic;
+
+namespace FluentValidation.Tests {
+
+	[TestClass]
+	public class MessageFormatterTests {
+
+		private MessageFormatter _messageFormatter;
+
+		[TestInitialize]
+		public void SetUp() {
+			_messageFormatter = new MessageFormatter();
+		}
+
+		[TestMethod]
+		public void BuildMessage_ReplacesSinglePlaceholderWithCorrectValue() {
+			// Arrange
+			_messageFormatter.Placeholders["Name"] = "John";
+			string template = "Hello, {Name}!";
+			string expected = "Hello, John!";
+
+			// Act
+			string result = _messageFormatter.BuildMessage(template);
+
+			// Assert
+			Assert.AreEqual(expected, result);
+		}
+
+		[TestMethod]
+		public void BuildMessage_ReplacesMultiplePlaceholdersWithCorrectValues() {
+			// Arrange
+			_messageFormatter.Placeholders["FirstName"] = "John";
+			_messageFormatter.Placeholders["LastName"] = "Doe";
+			string template = "{FirstName} {LastName} is here.";
+			string expected = "John Doe is here.";
+
+			// Act
+			string result = _messageFormatter.BuildMessage(template);
+
+			// Assert
+			Assert.AreEqual(expected, result);
+		}
+
+		[TestMethod]
+		public void BuildMessage_HandlesMissingPlaceholdersGracefully() {
+			// Arrange
+			string template = "Hello, {Name}!";
+			string expected = "Hello, {Name}!"; // Placeholder not replaced
+
+			// Act
+			string result = _messageFormatter.BuildMessage(template);
+
+			// Assert
+			Assert.AreEqual(expected, result);
+		}
+
+		[TestMethod]
+		public void BuildMessage_AppliesFormatWhenSpecified() {
+			// Arrange
+			_messageFormatter.Placeholders["Date"] = new DateTime(2025, 1, 1);
+			string template = "Today is {Date:yyyy-MM-dd}.";
+			string expected = "Today is 2025-01-01.";
+
+			// Act
+			string result = _messageFormatter.BuildMessage(template);
+
+			// Assert
+			Assert.AreEqual(expected, result);
+		}
+
+		[TestMethod]
+		public void BuildMessage_IgnoresInvalidPlaceholders() {
+			// Arrange
+			string template = "Invalid placeholder: {Invalid}";
+			string expected = "Invalid placeholder: {Invalid}";
+
+			// Act
+			string result = _messageFormatter.BuildMessage(template);
+
+			// Assert
+			Assert.AreEqual(expected, result);
+		}
+
+		[TestMethod]
+		[DataRow(null, "", DisplayName = "Null template")]
+		[DataRow("", "", DisplayName = "Empty template")]
+		public void BuildMessage_HandlesNullOrEmptyTemplate(string template, string expected) {
+			// Act
+			string result = _messageFormatter.BuildMessage(template);
+
+			// Assert
+			Assert.AreEqual(expected, result);
+		}
+
+		[TestMethod]
+		public void BuildMessage_HandlesPlaceholdersWithNullValues() {
+			// Arrange
+			_messageFormatter.Placeholders["Name"] = null;
+			string template = "Hello, {Name}!";
+			string expected = "Hello, !";
+
+			// Act
+			string result = _messageFormatter.BuildMessage(template);
+
+			// Assert
+			Assert.AreEqual(expected, result);
+		}
+
+		[TestMethod]
+		public void BuildMessage_IgnoresUnusedPlaceholders() {
+			// Arrange
+			_messageFormatter.Placeholders["Name"] = "John";
+			string template = "Welcome!";
+			string expected = "Welcome!";
+
+			// Act
+			string result = _messageFormatter.BuildMessage(template);
+
+			// Assert
+			Assert.AreEqual(expected, result);
+		}
+	}
+}
+
+
+Error Messages:
+Here are the error messages reported by the IDE:
+Severity	Code	Description	Line	Suppression State	Details
+Error (active)	CS1061	'MessageFormatter' does not contain a definition for 'Placeholders' and no accessible extension method 'Placeholders' accepting a first argument of type 'MessageFormatter' could be found (are you missing a using directive or an assembly reference?)	20		
+Error (active)	CS1061	'MessageFormatter' does not contain a definition for 'Placeholders' and no accessible extension method 'Placeholders' accepting a first argument of type 'MessageFormatter' could be found (are you missing a using directive or an assembly reference?)	34		
+Error (active)	CS1061	'MessageFormatter' does not contain a definition for 'Placeholders' and no accessible extension method 'Placeholders' accepting a first argument of type 'MessageFormatter' could be found (are you missing a using directive or an assembly reference?)	35		
+Error (active)	CS1061	'MessageFormatter' does not contain a definition for 'Placeholders' and no accessible extension method 'Placeholders' accepting a first argument of type 'MessageFormatter' could be found (are you missing a using directive or an assembly reference?)	62		
+Error (active)	CS1061	'MessageFormatter' does not contain a definition for 'Placeholders' and no accessible extension method 'Placeholders' accepting a first argument of type 'MessageFormatter' could be found (are you missing a using directive or an assembly reference?)	100		
+Error (active)	CS1061	'MessageFormatter' does not contain a definition for 'Placeholders' and no accessible extension method 'Placeholders' accepting a first argument of type 'MessageFormatter' could be found (are you missing a using directive or an assembly reference?)	114		
+
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the BuildMessage method from the MessageFormatter class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+namespace FluentValidation.Internal;
+
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+
+/// <summary>
+/// Assists in the construction of validation messages.
+/// </summary>
+public class MessageFormatter {
+	readonly Dictionary<string, object> _placeholderValues = new(2);
+
+	private static readonly Regex _keyRegex = new Regex("{([^{}:]+)(?::([^{}]+))?}", RegexOptions.Compiled);
+
+	/// <summary>
+	/// Constructs the final message from the specified template.
+	/// </summary>
+	/// <param name="messageTemplate">Message template</param>
+	/// <returns>The message with placeholders replaced with their appropriate values</returns>
+	public virtual string BuildMessage(string messageTemplate) {
+		return _keyRegex.Replace(messageTemplate, m =>	{
+			var key = m.Groups[1].Value;
+
+			if (!_placeholderValues.TryGetValue(key, out var value))
+				return m.Value; // No placeholder / value
+
+			var format = m.Groups[2].Success // Format specified?
+				? $"{{0:{m.Groups[2].Value}}}"
+				: null;
+
+			return format == null
+				? value?.ToString()
+				: string.Format(format, value);
+		});
+	}
+}

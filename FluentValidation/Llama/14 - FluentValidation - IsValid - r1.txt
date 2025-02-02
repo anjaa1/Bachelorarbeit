@@ -1,0 +1,170 @@
+The generated MSTest test does not compile. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test class that does not compile:
+using FluentValidation.Validators;
+using FluentValidation.TestHelper;
+using Xunit;
+
+public class EmptyValidatorTests {
+	[Fact]
+	public void IsValid_returns_true_for_null_value() {
+		// Arrange
+		var validator = new EmptyValidator<string, string>();
+		var context = new ValidationContext<string>("test");
+
+		// Act
+		var result = validator.IsValid(context, (string)null);
+
+		// Assert
+		Assert.True(result);
+	}
+
+	[Fact]
+	public void IsValid_returns_true_for_empty_string() {
+		// Arrange
+		var validator = new EmptyValidator<string, string>();
+		var context = new ValidationContext<string>("test");
+
+		// Act
+		var result = validator.IsValid(context, string.Empty);
+
+		// Assert
+		Assert.True(result);
+	}
+
+	[Fact]
+	public void IsValid_returns_true_for_empty_collection() {
+		// Arrange
+		var validator = new EmptyValidator<string, string[]>();
+		var context = new ValidationContext<string>("test");
+
+		// Act
+		var result = validator.IsValid(context, new string[0]);
+
+		// Assert
+		Assert.True(result);
+	}
+
+	[Fact]
+	public void IsValid_returns_true_for_empty_enumerable() {
+		// Arrange
+		var validator = new EmptyValidator<string, IEnumerable<string>>();
+		var context = new ValidationContext<string>("test");
+
+		// Act
+		var result = validator.IsValid(context, new List<string>());
+
+		// Assert
+		Assert.True(result);
+	}
+
+	[Fact]
+	public void IsValid_returns_false_for_non_empty_string() {
+		// Arrange
+		var validator = new EmptyValidator<string, string>();
+		var context = new ValidationContext<string>("test");
+
+		// Act
+		var result = validator.IsValid(context, "test");
+
+		// Assert
+		Assert.False(result);
+	}
+
+	[Fact]
+	public void IsValid_returns_false_for_non_empty_collection() {
+		// Arrange
+		var validator = new EmptyValidator<string, string[]>();
+		var context = new ValidationContext<string>("test");
+
+		// Act
+		var result = validator.IsValid(context, new[] { "test" });
+
+		// Assert
+		Assert.False(result);
+	}
+
+	[Fact]
+	public void IsValid_returns_false_for_non_empty_enumerable() {
+		// Arrange
+		var validator = new EmptyValidator<string, IEnumerable<string>>();
+		var context = new ValidationContext<string>("test");
+
+		// Act
+		var result = validator.IsValid(context, new[] { "test" });
+
+		// Assert
+		Assert.False(result);
+	}
+
+	[Fact]
+	public void IsValid_returns_false_for_default_value() {
+		// Arrange
+		var validator = new EmptyValidator<string, string>();
+		var context = new ValidationContext<string>("test");
+
+		// Act
+		var result = validator.IsValid(context, default);
+
+		// Assert
+		Assert.False(result);
+	}
+}
+
+Error Messages:
+Here are the error messages reported by the IDE:
+Severity	Code	Description	Line	Details
+Error (active)	CS0246	The type or namespace name 'CreditCardValidator<>' could not be found (are you missing a using directive or an assembly reference?)	12	
+Error (active)	CS0246	The type or namespace name 'CreditCardValidator<>' could not be found (are you missing a using directive or an assembly reference?)	25	
+Error (active)	CS0246	The type or namespace name 'CreditCardValidator<>' could not be found (are you missing a using directive or an assembly reference?)	38	
+Error (active)	CS0246	The type or namespace name 'CreditCardValidator<>' could not be found (are you missing a using directive or an assembly reference?)	51	
+Error (active)	CS0246	The type or namespace name 'CreditCardValidator<>' could not be found (are you missing a using directive or an assembly reference?)	64	
+Error (active)	CS0246	The type or namespace name 'CreditCardValidator<>' could not be found (are you missing a using directive or an assembly reference?)	77	
+
+CS0246: The type or namespace name 'XUnit' could not be found (are you missing a using directive or an assembly reference?)
+CS0246: The type or namespace name 'Fact' could not be found (are you missing a using directive or an assembly reference?)
+CS0246: The type or namespace name 'FactAttribute' could not be found (are you missing a using directive or an assembly reference?)
+CS0117: 'Assert' does not contain a definition for 'True'
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the IsValid method from the EmptyValidator class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+namespace FluentValidation.Validators;
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
+public class EmptyValidator<T,TProperty> : PropertyValidator<T,TProperty> {
+
+	public override string Name => "EmptyValidator";
+
+	public override bool IsValid(ValidationContext<T> context, TProperty value) {
+		if (value == null) {
+			return true;
+		}
+
+		if (value is string s && string.IsNullOrWhiteSpace(s)) {
+			return true;
+		}
+
+		if (value is ICollection col && col.Count == 0) {
+			return true;
+		}
+
+		if (value is IEnumerable e && IsEmpty(e)) {
+			return true;
+		}
+
+		return EqualityComparer<TProperty>.Default.Equals(value, default);
+	}
+}
+
+Here are additional project-specific details referenced in the method:
+ValidationContext<T>:
+- namespace: FluentValidation
+- Constructor: ValidationContext<T>(T instanceToValidate)

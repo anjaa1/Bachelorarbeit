@@ -1,0 +1,85 @@
+The generated MSTest test compiles but fails during execution. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test that does not compile:
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using FluentValidation;
+using FluentValidation.Validators;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace FluentValidationTests {
+
+	[TestClass]
+	public class EmptyValidatorTests {
+
+		private class TestContext<T> : ValidationContext<T> {
+			public TestContext(T instanceToValidate) : base(instanceToValidate) { }
+		}
+
+		private EmptyValidator<object, object> _validator;
+
+		[TestInitialize]
+		public void Setup() {
+			_validator = new EmptyValidator<object, object>();
+		}
+				[TestMethod]
+		public void IsValid_DefaultValue_ReturnsTrue() {
+			// Arrange
+			ValidationContext<object> context = null;
+
+			// Act
+			var result = _validator.IsValid(context, default(int));
+
+			// Assert
+			Assert.IsTrue(result);
+		}
+		}}
+
+Error Messages:
+Here are the error messages reported by the IDE:
+Assert.IsTrue failed.
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the IsValid method from the EmptyValidator class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+namespace FluentValidation.Validators;
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
+public class EmptyValidator<T,TProperty> : PropertyValidator<T,TProperty> {
+
+	public override string Name => "EmptyValidator";
+
+	public override bool IsValid(ValidationContext<T> context, TProperty value) {
+		if (value == null) {
+			return true;
+		}
+
+		if (value is string s && string.IsNullOrWhiteSpace(s)) {
+			return true;
+		}
+
+		if (value is ICollection col && col.Count == 0) {
+			return true;
+		}
+
+		if (value is IEnumerable e && IsEmpty(e)) {
+			return true;
+		}
+
+		return EqualityComparer<TProperty>.Default.Equals(value, default);
+	}
+}
+
+Here are additional project-specific details referenced in the method:
+ValidationContext<T>:
+- namespace: FluentValidation
+- Constructor: ValidationContext<T>(T instanceToValidate)

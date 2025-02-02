@@ -1,0 +1,140 @@
+The generated MSTest test does not compile. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test class that does not compile:
+using Humanizer;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Text.RegularExpressions;
+
+namespace HumanizerTests {
+    [TestClass]
+    public class StringHumanizeExtensionsTests {
+        [TestMethod]
+        public void Humanize_Humanizes_UnderscoredString() {
+            // Arrange
+            var input = "Underscored_input_String_is_turned_INTO_sentence";
+            var expected = "Underscored input String is turned INTO sentence";
+
+            // Act
+            var result = input.Humanize();
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [TestMethod]
+        public void Humanize_Humanizes_DashedString() {
+            // Arrange
+            var input = "Underscored-input-String-is-turned-INTO-sentence";
+            var expected = "Underscored input String is turned INTO sentence";
+
+            // Act
+            var result = input.Humanize();
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [TestMethod]
+        public void Humanize_Humanizes_FreeStandingSpacingString() {
+            // Arrange
+            var input = "free- _standing- _ spacing";
+            var expected = "free standing spacing";
+
+            // Act
+            var result = input.Humanize();
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [TestMethod]
+        public void Humanize_DoesNotChange_UpperCaseString() {
+            // Arrange
+            var input = "UPPERCASE";
+            var expected = "UPPERCASE";
+
+            // Act
+            var result = input.Humanize();
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [TestMethod]
+        public void Humanize_HandlesNullInput() {
+            // Arrange
+            var input = null;
+            var expected = null;
+
+            // Act
+            var result = input?.Humanize();
+
+            // Assert
+            Assert.IsNull(result);
+        }
+
+        [TestMethod]
+        public void Humanize_HandlesEmptyString() {
+            // Arrange
+            var input = string.Empty;
+            var expected = string.Empty;
+
+            // Act
+            var result = input?.Humanize();
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+    }
+}
+
+Error Messages:
+Here are the error messages reported by the IDE:
+Severity	Code	Description	Line	Details
+Error (active)	CS0815	Cannot assign <null> to an implicitly-typed variable	64	
+Error (active)	CS0815	Cannot assign <null> to an implicitly-typed variable	65	
+
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the Humanize method from the StringHumanizeExtensions class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+namespace Humanizer;
+
+/// <summary>
+/// Contains extension methods for humanizing string values.
+/// </summary>
+public static class StringHumanizeExtensions
+{
+    /// <summary>
+    /// Humanizes the input string; e.g. Underscored_input_String_is_turned_INTO_sentence -> 'Underscored input String is turned INTO sentence'
+    /// </summary>
+    /// <param name="input">The string to be humanized</param>
+    public static string Humanize(this string input)
+    {
+        // if input is all capitals (e.g. an acronym) then return it without change
+        if (input.All(char.IsUpper))
+        {
+            return input;
+        }
+
+        // if input contains a dash or underscore which precedes or follows a space (or both, e.g. free-standing)
+        // remove the dash/underscore and run it through FromPascalCase
+        if (FreestandingSpacingCharRegex.IsMatch(input))
+        {
+            return FromPascalCase(FromUnderscoreDashSeparatedWords(input));
+        }
+
+        if (input.Contains("_") || input.Contains("-"))
+        {
+            return FromUnderscoreDashSeparatedWords(input);
+        }
+
+        return FromPascalCase(input);
+    }
+}
+
+

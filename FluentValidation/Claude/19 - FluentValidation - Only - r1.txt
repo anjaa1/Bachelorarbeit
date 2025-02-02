@@ -1,0 +1,231 @@
+The generated MSTest test does not compile. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test class that does not compile:
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using FluentValidation.TestHelper;
+using FluentValidation.Results;
+using System.Collections.Generic;
+using System.Linq;
+using Moq;
+
+namespace FluentValidation.Tests {
+	[TestClass]
+	public class ValidationTestExtensionTests {
+		private Mock<ITestValidationWith> _mockValidation;
+		private Mock<TestValidationContinuation> _mockContinuation;
+
+		[TestInitialize]
+		public void Setup() {
+			_mockValidation = new Mock<ITestValidationWith>();
+			_mockContinuation = new Mock<TestValidationContinuation>();
+		}
+
+		[TestMethod]
+		public void Only_WithNoUnmatchedFailures_ReturnsOriginalObject() {
+			// Arrange
+			_mockValidation.Setup(x => x.UnmatchedFailures).Returns(Enumerable.Empty<ValidationFailure>());
+			var validationWith = _mockValidation.Object;
+
+			// Act
+			var result = validationWith.Only();
+
+			// Assert
+			Assert.AreEqual(validationWith, result);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ValidationTestException))]
+		public void Only_WithUnmatchedFailures_ThrowsValidationTestException() {
+			// Arrange
+			var unmatchedFailures = new List<ValidationFailure>
+			{
+								new ValidationFailure("PropertyName", "Error message 1"),
+								new ValidationFailure("PropertyName", "Error message 2")
+						};
+			_mockValidation.Setup(x => x.UnmatchedFailures).Returns(unmatchedFailures);
+			var validationWith = _mockValidation.Object;
+
+			// Act
+			validationWith.Only();
+		}
+
+		[TestMethod]
+		public void Only_WithUnmatchedFailures_ThrowsExceptionWithCorrectMessage() {
+			// Arrange
+			var unmatchedFailures = new List<ValidationFailure>
+			{
+								new ValidationFailure("PropertyName", "Error message 1")
+						};
+			_mockValidation.Setup(x => x.UnmatchedFailures).Returns(unmatchedFailures);
+			var validationWith = _mockValidation.Object;
+
+			try {
+				// Act
+				validationWith.Only();
+				Assert.Fail("Expected ValidationTestException was not thrown.");
+			}
+			catch (ValidationTestException ex) {
+				// Assert
+				StringAssert.Contains(ex.Message, "Expected to have errors only matching specified conditions");
+				StringAssert.Contains(ex.Message, "[0]: Error message 1");
+			}
+		}
+
+		[TestMethod]
+		public void Only_WithParentContainingUnmatchedFailures_IncludesParentFailures() {
+			// Arrange
+			var parentFailures = new List<ValidationFailure>
+			{
+								new ValidationFailure("ParentProperty", "Parent error")
+						};
+			var childFailures = new List<ValidationFailure>
+			{
+								new ValidationFailure("ChildProperty", "Child error")
+						};
+
+			var parentContinuation = new Mock<TestValidationContinuation>();
+			parentContinuation.Setup(x => x.UnmatchedFailures).Returns(parentFailures);
+
+			_mockContinuation.Setup(x => x.Parent).Returns(parentContinuation.Object);
+			_mockContinuation.Setup(x => x.UnmatchedFailures).Returns(childFailures);
+			_mockValidation.Setup(x => x.UnmatchedFailures).Returns(childFailures);
+
+			try {
+				// Act
+				_mockContinuation.Object.Only();
+				Assert.Fail("Expected ValidationTestException was not thrown.");
+			}
+			catch (ValidationTestException ex) {
+				// Assert
+				StringAssert.Contains(ex.Message, "Parent error");
+				StringAssert.Contains(ex.Message, "Child error");
+			}
+		}
+
+		[TestMethod]
+		public void Only_WithMultipleNestedParents_IncludesAllParentFailures() {
+			// Arrange
+			var grandParentFailures = new List<ValidationFailure>
+			{
+								new ValidationFailure("GrandParentProperty", "GrandParent error")
+						};
+			var parentFailures = new List<ValidationFailure>
+			{
+								new ValidationFailure("ParentProperty", "Parent error")
+						};
+			var childFailures = new List<ValidationFailure>
+			{
+								new ValidationFailure("ChildProperty", "Child error")
+						};
+
+			var grandParentContinuation = new Mock<TestValidationContinuation>();
+			grandParentContinuation.Setup(x => x.UnmatchedFailures).Returns(grandParentFailures);
+
+			var parentContinuation = new Mock<TestValidationContinuation>();
+			parentContinuation.Setup(x => x.UnmatchedFailures).Returns(parentFailures);
+			parentContinuation.Setup(x => x.Parent).Returns(grandParentContinuation.Object);
+
+			_mockContinuation.Setup(x => x.Parent).Returns(parentContinuation.Object);
+			_mockContinuation.Setup(x => x.UnmatchedFailures).Returns(childFailures);
+			_mockValidation.Setup(x => x.UnmatchedFailures).Returns(childFailures);
+
+			try {
+				// Act
+				_mockContinuation.Object.Only();
+				Assert.Fail("Expected ValidationTestException was not thrown.");
+			}
+			catch (ValidationTestException ex) {
+				// Assert
+				StringAssert.Contains(ex.Message, "GrandParent error");
+				StringAssert.Contains(ex.Message, "Parent error");
+				StringAssert.Contains(ex.Message, "Child error");
+			}
+		}
+	}
+}
+
+Error Messages:
+Here are the error messages reported by the IDE:
+Severity	Code	Description	Line	Suppression State	Details
+Error (active)	CS0122	'TestValidationContinuation' is inaccessible due to its protection level	83		
+Error (active)	CS0122	'TestValidationContinuation' is inaccessible due to its protection level	12		
+Error (active)	CS0122	'TestValidationContinuation' is inaccessible due to its protection level	17		
+Error (active)	CS0122	'TestValidationContinuation.UnmatchedFailures' is inaccessible due to its protection level	84		
+Error (active)	CS0122	'TestValidationContinuation.Parent' is inaccessible due to its protection level	86		
+Error (active)	CS0122	'TestValidationContinuation.UnmatchedFailures' is inaccessible due to its protection level	87		
+Error (active)	CS0122	'TestValidationContinuation' is inaccessible due to its protection level	118		
+Error (active)	CS0122	'TestValidationContinuation.UnmatchedFailures' is inaccessible due to its protection level	119		
+Error (active)	CS0122	'TestValidationContinuation' is inaccessible due to its protection level	121		
+Error (active)	CS0122	'TestValidationContinuation.UnmatchedFailures' is inaccessible due to its protection level	122		
+Error (active)	CS0122	'TestValidationContinuation.Parent' is inaccessible due to its protection level	123		
+Error (active)	CS0122	'TestValidationContinuation.Parent' is inaccessible due to its protection level	125		
+Error (active)	CS0122	'TestValidationContinuation.UnmatchedFailures' is inaccessible due to its protection level	126		
+
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the Only method from the ValidationTestExtension class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+namespace FluentValidation.TestHelper;
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+using Internal;
+using Results;
+using Validators;
+
+public static class ValidationTestExtension {
+	internal const string MatchAnyFailure = "__FV__ANY";
+
+	public static ITestValidationWith Only(this ITestValidationWith failures) {
+		var unmatchedFailures = failures.UnmatchedFailures;
+		var continuation = (TestValidationContinuation) failures;
+
+		// Also add in any unmatched failures from the parent (if there is one) recursively.
+		do {
+			if (continuation.Parent != null) {
+				unmatchedFailures = unmatchedFailures.Union(continuation.Parent.UnmatchedFailures);
+			}
+			continuation = continuation.Parent as TestValidationContinuation;
+		} while (continuation != null);
+
+		var unmatchedFailuresList = unmatchedFailures.ToList();
+
+		if (unmatchedFailuresList.Count > 0) {
+			var errorMessageBanner = "Expected to have errors only matching specified conditions";
+			string errorMessageDetails = "";
+			for (int i = 0; i < unmatchedFailuresList.Count; i++) {
+				errorMessageDetails += $"[{i}]: {unmatchedFailuresList[i].ErrorMessage}\n";
+			}
+			var errorMessage = $"{errorMessageBanner}\n----\nUnexpected Errors:\n{errorMessageDetails}";
+
+			throw new ValidationTestException(errorMessage);
+		}
+		return failures;
+	}
+}
+
+Here are additional project-specific details referenced in the method:
+ITestValidationWith
+- interface: public interface ITestValidationWith : ITestValidationContinuation {
+}
+- namespace: FluentValidation.TestHelper
+- Inherits: ITestValidationContinuation
+
+ITestValidationContinuation
+- namespace: FluentValidation.TestHelper
+- interface: public interface ITestValidationContinuation : IEnumerable<ValidationFailure> {
+	IEnumerable<ValidationFailure> UnmatchedFailures { get; }
+}
+- Properties: IEnumerable<ValidationFailure> UnmatchedFailures
+- methods: IEnumerator<ValidationFailure> GetEnumerator()
+- dependencies: ValidationFailure (Namespace: FluentValidation.Results)
+

@@ -1,0 +1,168 @@
+The generated MSTest test does not compile. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test class that does not compile:
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Globalization;
+using Humanizer;
+using Humanizer.Pluralization;
+
+namespace Humanizer.Tests {
+    [TestClass]
+    public class ToQuantityExtensionsTests {
+        [TestMethod]
+        public void ToQuantity_WhenQuantityIsOne_ReturnsSingularizedInput() {
+            // Arrange
+            var input = "cats";
+            var quantity = 1L;
+
+            // Act
+            var result = input.ToQuantity(quantity);
+
+            // Assert
+            Assert.AreEqual("cat", result);
+        }
+
+        [TestMethod]
+        public void ToQuantity_WhenQuantityIsNotOne_ReturnsPluralizedInput() {
+            // Arrange
+            var input = "cat";
+            var quantity = 2L;
+
+            // Act
+            var result = input.ToQuantity(quantity);
+
+            // Assert
+            Assert.AreEqual("cats", result);
+        }
+
+        [TestMethod]
+        public void ToQuantity_WhenShowQuantityAsIsNone_ReturnsInput() {
+            // Arrange
+            var input = "cats";
+            var quantity = 2L;
+
+            // Act
+            var result = input.ToQuantity(quantity, showQuantityAs: ShowQuantityAs.None);
+
+            // Assert
+            Assert.AreEqual("cats", result);
+        }
+
+        [TestMethod]
+        public void ToQuantity_WhenShowQuantityAsIsNumeric_ReturnsFormattedString() {
+            // Arrange
+            var input = "cat";
+            var quantity = 2L;
+            var format = "N0";
+
+            // Act
+            var result = input.ToQuantity(quantity, showQuantityAs: ShowQuantityAs.Numeric, format: format);
+
+            // Assert
+            Assert.AreEqual("2 cats", result);
+        }
+
+        [TestMethod]
+        public void ToQuantity_WhenShowQuantityAsIsWords_ReturnsFormattedString() {
+            // Arrange
+            var input = "cat";
+            var quantity = 2L;
+
+            // Act
+            var result = input.ToQuantity(quantity, showQuantityAs: ShowQuantityAs.Words);
+
+            // Assert
+            Assert.AreEqual("two cats", result);
+        }
+
+        [TestMethod]
+        public void ToQuantity_WhenFormatProviderIsSpecified_ReturnsFormattedString() {
+            // Arrange
+            var input = "cat";
+            var quantity = 2L;
+            var format = "N0";
+            var culture = new CultureInfo("en-US");
+
+            // Act
+            var result = input.ToQuantity(quantity, showQuantityAs: ShowQuantityAs.Numeric, format: format, formatProvider: culture);
+
+            // Assert
+            Assert.AreEqual("2 cats", result);
+        }
+
+        [TestMethod]
+        public void ToQuantity_WhenInvalidInputIsPassed_ThrowsArgumentException() {
+            // Arrange
+            var input = "cats";
+            var quantity = 2L;
+
+            // Act and Assert
+            Assert.ThrowsException<ArgumentException>(() => string.IsNullOrEmpty(input) ? throw new ArgumentException() : input.ToQuantity(quantity));
+        }
+    }
+}
+
+Error Messages:
+Here are the error messages reported by the IDE:
+Severity	Code	Description	Line	Details
+Error (active)	CS0234	The type or namespace name 'Pluralization' does not exist in the namespace 'Humanizer' (are you missing an assembly reference?)	5	
+
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the ToQuantity method from the ToQuantityExtensions class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+namespace Humanizer;
+/// <summary>
+/// Provides extensions for formatting a <see cref="string"/> word as a quantity.
+/// </summary>
+public static class ToQuantityExtensions
+{
+   static string ToQuantity(this string input, long quantity, ShowQuantityAs showQuantityAs = ShowQuantityAs.Numeric, string? format = null, IFormatProvider? formatProvider = null)
+   {
+       var transformedInput = quantity == 1
+           ? input.Singularize(inputIsKnownToBePlural: false)
+           : input.Pluralize(inputIsKnownToBeSingular: false);
+
+       if (showQuantityAs == ShowQuantityAs.None)
+       {
+           return transformedInput;
+       }
+
+       if (showQuantityAs == ShowQuantityAs.Numeric)
+       {
+           return string.Format(formatProvider, "{0} {1}", quantity.ToString(format, formatProvider), transformedInput);
+       }
+
+       return $"{quantity.ToWords()} {transformedInput}";
+   }
+}
+
+Here are additional project-specific details referenced in the method:
+The method to be tested is accessed through the public `ToQuantity` method. While tests will invoke the public method, the focus is on validating the internal logic of the private `ToQuantity` method, which handles pluralization, singularization, and quantity formatting based on `ShowQuantityAs`:
+    /// <summary>
+    /// Prefixes the provided word with the number and accordingly pluralizes or singularizes the word
+    /// </summary>
+    /// <param name="input">The word to be prefixed</param>
+    /// <param name="quantity">The quantity of the word</param>
+    /// <param name="format">A standard or custom numeric format string.</param>
+    /// <param name="formatProvider">An object that supplies culture-specific formatting information.</param>
+    /// <example>
+    /// "request".ToQuantity(0) => "0 requests"
+    /// "request".ToQuantity(10000, format: "N0") => "10,000 requests"
+    /// "request".ToQuantity(1, format: "N0") => "1 request"
+    /// </example>
+    public static string ToQuantity(this string input, long quantity, string? format, IFormatProvider? formatProvider = null) =>
+        input.ToQuantity(quantity, showQuantityAs: ShowQuantityAs.Numeric, format: format, formatProvider: formatProvider);
+		
+		
+ShowQuantityAs: Enumerates the ways of displaying a quantity value when converting.
+- Namespace: Humanizer
+- Values:
+  - `None = 0`: No quantity will be included in the formatted string.
+  - `Numeric`: The quantity is included as its numeric value (e.g., "1").
+  - `Words`: The quantity is included as words (e.g., "123" → "one hundred and twenty-three").
+

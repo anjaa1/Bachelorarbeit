@@ -1,0 +1,95 @@
+The generated MSTest test compiles but fails during execution. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test that does not compile:
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace MathNet.Numerics.Tests
+{
+    [TestClass]
+    public class SeriesTests
+    {
+        [TestMethod]
+        public void Evaluate_InfiniteSequence_StopsAutomatically()
+        {
+            // Arrange
+            IEnumerable<double> infiniteSequence = GenerateGeometricSequence(2.0, 0.5);
+
+            // Act
+            double result = Series.Evaluate(infiniteSequence);
+
+            // Assert
+            Assert.AreEqual(4.0, result, 1e-10);
+        }
+		Here are the error messages reported by the IDE:
+ Assert.AreEqual failed. Expected a difference no greater than <1E-10> between expected value <4> and actual value <3,999969482421875>. 
+
+        [TestMethod]
+        public void Evaluate_NullSequence_ThrowsArgumentNullException()
+        {
+            // Act & Assert
+            Assert.ThrowsException<ArgumentNullException>(() => Series.Evaluate((IEnumerable<double>)null));
+        }
+		Here are the error messages reported by the IDE:
+Assert.ThrowsException failed. Threw exception NullReferenceException, but exception ArgumentNullException was expected. 
+Exception Message: Object reference not set to an instance of an object.
+}}
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the Evaluate method from the Series class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+using System;
+using System.Collections.Generic;
+
+namespace MathNet.Numerics
+{
+    public static class Series
+    {
+        /// <summary>
+        /// Numerically stable series summation (stops automatically).
+        /// </summary>
+        /// <param name="infiniteSummands">provides the summands sequentially</param>
+        /// <returns>Sum</returns>
+        public static double Evaluate(IEnumerable<double> infiniteSummands)
+        {
+            double compensation = 0.0;
+            double current, sum;
+            const double factor = 1 << 16;
+
+            using (var enumerator = infiniteSummands.GetEnumerator())
+            {
+                if (!enumerator.MoveNext())
+                {
+                    return 0.0;
+                }
+
+                sum = enumerator.Current;
+                if (!enumerator.MoveNext())
+                {
+                    return sum;
+                }
+
+                do
+                {
+                    // Kahan Summation
+                    // NOTE (ruegg): do NOT optimize. Now, how to tell that the compiler?
+                    current = enumerator.Current;
+                    double y = current - compensation;
+                    double t = sum + y;
+                    compensation = t - sum;
+                    compensation -= y;
+                    sum = t;
+                } while (Math.Abs(sum) < Math.Abs(factor * current) && enumerator.MoveNext());
+            }
+
+            return sum;
+        }
+    }
+}
+

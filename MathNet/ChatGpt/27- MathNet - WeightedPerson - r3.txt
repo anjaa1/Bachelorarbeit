@@ -1,0 +1,126 @@
+The generated MSTest test does not compile. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test class that does not compile:
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
+using MathNet.Numerics.Statistics;
+
+namespace MathNet.Numerics.Tests
+{
+    [TestClass]
+    public class WeightedPearsonTests
+    {
+       [TestMethod]
+        public void WeightedPearson_ValidInputs_ReturnsCorrectResult()
+        {
+            // Arrange
+            var dataA = new List<double> { 1.0, 2.0, 3.0, 4.0 };
+            var dataB = new List<double> { 2.0, 4.0, 6.0, 8.0 };
+            var weights = new List<double> { 1.0, 1.0, 1.0, 1.0 };
+
+            // Act
+            var result = Correlation.WeightedPearson(dataA, dataB, weights);
+
+            // Assert
+            Assert.AreEqual(1.0, result, 1e-6, "The correlation should be perfect (1.0).\");
+        }
+    }
+}
+
+
+Error Messages:
+Here are the error messages reported by the IDE:
+Severity	Code	Description	Line	Details
+Error (active)	CS1010	Newline in constant	23	
+Error (active)	CS1026	) expected	23	
+Error (active)	CS1002	; expected	23	
+
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the WeightedPearson method from the Correlation class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using MathNet.Numerics.IntegralTransforms;
+using MathNet.Numerics.LinearAlgebra;
+using Complex = System.Numerics.Complex;
+
+namespace MathNet.Numerics.Statistics
+{
+    /// <summary>
+    /// A class with correlation measures between two datasets.
+    /// </summary>
+    public static class Correlation
+    {
+		
+        
+        /// <summary>
+        /// Computes the Weighted Pearson Product-Moment Correlation coefficient.
+        /// </summary>
+        /// <param name="dataA">Sample data A.</param>
+        /// <param name="dataB">Sample data B.</param>
+        /// <param name="weights">Corresponding weights of data.</param>
+        /// <returns>The Weighted Pearson product-moment correlation coefficient.</returns>
+        public static double WeightedPearson(IEnumerable<double> dataA, IEnumerable<double> dataB, IEnumerable<double> weights)
+        {
+            double meanA = 0;
+            double meanB = 0;
+            double varA = 0;
+            double varB = 0;
+            double sumWeight = 0;
+
+            double covariance = 0;
+
+            using (IEnumerator<double> ieA = dataA.GetEnumerator())
+            using (IEnumerator<double> ieB = dataB.GetEnumerator())
+            using (IEnumerator<double> ieW = weights.GetEnumerator())
+            {
+                while (ieA.MoveNext())
+                {
+                    if (!ieB.MoveNext())
+                    {
+                        throw new ArgumentOutOfRangeException(nameof(dataB), "The array arguments must have the same length.");
+                    }
+                    if (!ieW.MoveNext())
+                    {
+                        throw new ArgumentOutOfRangeException(nameof(weights), "The array arguments must have the same length.");
+                    }
+
+                    double xi = ieA.Current;
+                    double yi = ieB.Current;
+                    double wi = ieW.Current;
+
+                    double temp = sumWeight + wi;
+
+                    double deltaX = xi - meanA;
+                    double rX = deltaX*wi/temp;
+                    meanA += rX;
+                    varA += sumWeight*deltaX*rX;
+
+                    double deltaY = yi - meanB;
+                    double rY = deltaY*wi/temp;
+                    meanB += rY;
+                    varB += sumWeight*deltaY*rY;
+
+                    covariance += deltaX*deltaY*wi*(sumWeight/temp);
+                    sumWeight = temp;
+                }
+                if (ieB.MoveNext())
+                {
+                    throw new ArgumentOutOfRangeException(nameof(dataB), "The array arguments must have the same length.");
+                }
+                if (ieW.MoveNext())
+                {
+                    throw new ArgumentOutOfRangeException(nameof(weights), "The array arguments must have the same length.");
+                }
+            }
+            return covariance/Math.Sqrt(varA*varB);
+        }
+	}
+}
+

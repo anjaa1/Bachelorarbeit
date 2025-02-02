@@ -1,0 +1,83 @@
+The generated MSTest test compiles but fails during execution. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test that does not compile:
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+
+namespace Humanizer.Tests {
+    [TestClass]
+    public class EnglishArticleTests {
+        [TestMethod]
+        public void AppendArticlePrefix_ShouldIgnoreWhitespaceInInput() {
+            // Arrange
+            string[] input = { "  The Apple  ", "   A Banana", "An Orange   " };
+            string[] expected = { "Apple The", "Banana A", "Orange An" };
+
+            // Act
+            var result = EnglishArticle.AppendArticlePrefix(input);
+
+            // Assert
+            CollectionAssert.AreEqual(expected, result);
+        }
+	}
+}
+
+Error Messages:
+Here are the error messages reported by the IDE:
+ CollectionAssert.AreEqual failed. (Element at index 0 do not match.)
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the AppendArticlePrefix method from the EnglishArticle class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+namespace Humanizer;
+
+/// <summary>
+/// Contains methods for removing, appending and prepending article prefixes for sorting strings ignoring the article.
+/// </summary>
+public static class EnglishArticle
+{
+    static readonly Regex _regex = new("^((The)|(the)|(a)|(A)|(An)|(an))\\s\\w+", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Removes the prefixed article and appends it to the same string.
+    /// </summary>
+    /// <param name="items">The input array of strings</param>
+    /// <returns>Sorted string array</returns>
+    public static string[] AppendArticlePrefix(string[] items)
+    {
+        if (items.Length == 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(items));
+        }
+
+        var transformed = new string[items.Length];
+
+        for (var i = 0; i < items.Length; i++)
+        {
+            var item = items[i]
+                .AsSpan();
+            if (_regex.IsMatch(item))
+            {
+                var indexOf = item.IndexOf(' ');
+                var removed = item[indexOf..]
+                    .TrimStart();
+                var article = item[..indexOf]
+                    .TrimEnd();
+                transformed[i] = $"{removed} {article}";
+            }
+            else
+            {
+                transformed[i] = item
+                    .Trim()
+                    .ToString();
+            }
+        }
+
+        Array.Sort(transformed);
+        return transformed;
+    }
+}

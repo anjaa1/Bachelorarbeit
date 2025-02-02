@@ -1,0 +1,99 @@
+The generated MSTest test compiles but fails during execution. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test that does not compile:
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using FluentValidation;
+using FluentValidation.Validators;
+using System;
+
+namespace CreditCardValidatorTests {
+	[TestClass]
+	public class CreditCardValidatorTests {
+		private CreditCardValidator<object> _validator;
+
+		[TestInitialize]
+		public void Setup() {
+			_validator = new CreditCardValidator<object>();
+		}
+		[TestMethod]
+		public void IsValid_WithEmptyString_ReturnsFalse() {
+			// Arrange
+			string emptyString = "";
+			var context = new ValidationContext<object>(new object());
+
+			// Act
+			bool result = _validator.IsValid(context, emptyString);
+
+			// Assert
+			Assert.IsFalse(result);
+		}
+		Here are the error messages reported by the IDE:
+		    Assert.IsFalse failed. 
+
+		[TestMethod]
+		public void IsValid_WithWhitespaceOnly_ReturnsFalse() {
+			// Arrange
+			string whitespaceOnly = "   ";
+			var context = new ValidationContext<object>(new object());
+
+			// Act
+			bool result = _validator.IsValid(context, whitespaceOnly);
+
+			// Assert
+			Assert.IsFalse(result);
+		}
+		Here are the error messages reported by the IDE:
+		Assert.IsFalse failed. 
+
+	}
+}
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the IsValid method from the CreditCardValidator class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+namespace FluentValidation.Validators;
+
+using System.Linq;
+
+/// <summary>
+/// Ensures that the property value is a valid credit card number.
+/// </summary>
+public class CreditCardValidator<T> : PropertyValidator<T,string>, ICreditCardValidator {
+	public override bool IsValid(ValidationContext<T> context, string value) {
+		if (value == null) {
+			return true;
+		}
+
+		value = value.Replace("-", "").Replace(" ", "");
+
+		int checksum = 0;
+		bool evenDigit = false;
+		// http://www.beachnet.com/~hstiles/cardtype.html
+		foreach (char digit in value.ToCharArray().Reverse()) {
+			if (!char.IsDigit(digit)) {
+				return false;
+			}
+
+			int digitValue = (digit - '0') * (evenDigit ? 2 : 1);
+			evenDigit = !evenDigit;
+
+			while (digitValue > 0) {
+				checksum += digitValue % 10;
+				digitValue /= 10;
+			}
+		}
+
+		return (checksum % 10) == 0;
+	}
+}
+
+Here are additional project-specific details referenced in the method:
+ValidationContext<T>:
+- namespace: FluentValidation
+- Constructor: ValidationContext<T>(T instanceToValidate)
+

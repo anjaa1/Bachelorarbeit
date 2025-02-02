@@ -1,0 +1,93 @@
+The generated MSTest test compiles but fails during execution. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test that does not compile:
+
+using System;
+using System.Linq.Expressions;
+using System.Reflection;
+using FluentValidation.Internal;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace FluentValidationTests {
+	[TestClass]
+	public class ExtensionsTests {
+		// Helper class for testing
+		private class TestClass {
+			public int IntProperty { get; set; }
+			public string StringProperty { get; set; }
+			public NestedClass NestedProperty { get; set; }
+		}
+
+		private class NestedClass {
+			public double DoubleProperty { get; set; }
+		}
+
+				[TestMethod]
+		public void GetMember_NullExpression_ThrowsArgumentNullException() {
+			// Arrange
+			Expression<Func<TestClass, int>> expression = null;
+
+			// Act & Assert
+			try {
+				Extensions.GetMember(expression);
+				Assert.Fail("Expected ArgumentNullException not thrown.");
+			}
+			catch (ArgumentNullException ex) {
+				Assert.AreEqual("Value cannot be null. (Parameter 'expression')", ex.Message);
+			}
+		}}}
+
+Error Messages:
+Here are the error messages reported by the IDE:
+Test method FluentValidationTests.ExtensionsTests.GetMember_NullExpression_ThrowsArgumentNullException threw exception: 
+System.NullReferenceException: Object reference not set to an instance of an object.
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the GetMember method from the Extensions class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+namespace FluentValidation.Internal;
+
+using System;
+using System.Linq.Expressions;
+using System.Reflection;
+
+/// <summary>
+/// Useful extensions
+/// </summary>
+public static class Extensions {
+
+	/// <summary>
+	/// Gets a MemberInfo from a member expression.
+	/// </summary>
+	public static MemberInfo GetMember<T, TProperty>(this Expression<Func<T, TProperty>> expression) {
+		var memberExp = RemoveUnary(expression.Body) as MemberExpression;
+
+		if (memberExp == null) {
+			return null;
+		}
+
+		Expression currentExpr = memberExp.Expression;
+
+		// Unwind the expression to get the root object that the expression acts upon.
+		while (true) {
+			currentExpr = RemoveUnary(currentExpr);
+
+			if (currentExpr != null && currentExpr.NodeType == ExpressionType.MemberAccess) {
+				currentExpr = ((MemberExpression)currentExpr).Expression;
+			} else {
+				break;
+			}
+		}
+
+		if (currentExpr == null || currentExpr.NodeType != ExpressionType.Parameter) {
+			return null; // We don't care if we're not acting upon the model instance.
+		}
+
+		return memberExp.Member;
+	}
+}
+

@@ -1,0 +1,87 @@
+The generated MSTest test compiles but fails during execution. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test that does not compile:
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Humanizer;
+
+namespace Humanizer.Tests {
+    [TestClass]
+    public class CasingExtensionsTests {
+                [TestMethod]
+        public void ApplyCase_WhiteSpace_PreservesWhiteSpace() {
+            // Arrange
+            string input = "   multiple   spaces   ";
+
+            // Act & Assert - Testing all casing types
+            Assert.AreEqual("   MULTIPLE   SPACES   ", input.ApplyCase(LetterCasing.AllCaps), "AllCaps should preserve whitespace");
+            Assert.AreEqual("   multiple   spaces   ", input.ApplyCase(LetterCasing.LowerCase), "LowerCase should preserve whitespace");
+            Assert.AreEqual("   Multiple   Spaces   ", input.ApplyCase(LetterCasing.Title), "Title should preserve whitespace");
+            Assert.AreEqual("   Multiple   spaces   ", input.ApplyCase(LetterCasing.Sentence), "Sentence should preserve whitespace");
+        }
+		Here are the error messages reported by the IDE:
+		Assert.AreEqual failed. Expected:<   Multiple   spaces   >. Actual:<   multiple   spaces   >. Sentence should preserve whitespace
+}}
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the ApplyCase method from the CasingExtensions class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+namespace Humanizer;
+
+/// <summary>
+/// ApplyCase method to allow changing the case of a sentence easily
+/// </summary>
+public static class CasingExtensions
+{
+    /// <summary>
+    /// Changes the casing of the provided input
+    /// </summary>
+    public static string ApplyCase(this string input, LetterCasing casing) =>
+        casing switch
+        {
+            LetterCasing.Title => input.Transform(To.TitleCase),
+            LetterCasing.LowerCase => input.Transform(To.LowerCase),
+            LetterCasing.AllCaps => input.Transform(To.UpperCase),
+            LetterCasing.Sentence => input.Transform(To.SentenceCase),
+            _ => throw new ArgumentOutOfRangeException(nameof(casing))
+        };
+}
+
+Here are additional project-specific details referenced in the method:
+
+(public)LetterCasing: Options for specifying the desired letter casing for the output string
+- Namespace: Humanizer
+- Values:
+- Title: SomeString → Some String
+- AllCaps: SomeString → SOME STRING
+- LowerCase: SomeString → some string
+- Sentence: SomeString → Some string
+
+Transform: Transforms a string using the provided transformers. Transformations are applied in the provided order
+- Namespace: Humanizer
+- Method Signature: public static string Transform(this string input, params IStringTransformer[] transformers)
+- Class: belongs to pubic static Class To
+
+TitleCase: Changes a string to title case:
+- Namespace: Humanizer
+- Part of: To
+- Example: "INvalid caSEs arE corrected" → "Invalid Cases Are Corrected"
+
+UpperCase: Changes a string to upper case
+- Namespace: Humanizer
+- Part of: To
+- Example: "lower case statement" → "LOWER CASE STATEMENT"
+
+LowerCase: Changes a string to lower case
+- Namespace: Humanizer
+- Part of: To
+- Example: "Sentence casing" → "sentence casing"
+
+SentenceCase: Changes a string to sentence case
+- Namespace: Humanizer
+- Part of: To
+- Example: "lower case statement" → "Lower case statement"
+
+

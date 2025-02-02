@@ -1,0 +1,57 @@
+Create a test class using the MSTest framework to test the MinimumMagnitudePhase method from the StreamingStatistics class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Complex = System.Numerics.Complex;
+
+namespace MathNet.Numerics.Statistics
+{
+    /// <summary>
+    /// Statistics operating on an IEnumerable in a single pass, without keeping the full data in memory.
+    /// Can be used in a streaming way, e.g. on large datasets not fitting into memory.
+    /// </summary>
+    /// <seealso cref="SortedArrayStatistics"/>
+    /// <seealso cref="StreamingStatistics"/>
+    /// <seealso cref="Statistics"/>
+    public static class StreamingStatistics
+    {
+        /// <summary>
+        /// Returns the smallest absolute value from the enumerable, in a single pass without memoization.
+        /// Returns NaN if data is empty or any entry is NaN.
+        /// </summary>
+        /// <param name="stream">Sample stream, no sorting is assumed.</param>
+        public static Complex MinimumMagnitudePhase(IEnumerable<Complex> stream)
+        {
+            double minMagnitude = double.PositiveInfinity;
+            Complex min = new Complex(double.PositiveInfinity, double.PositiveInfinity);
+            bool any = false;
+
+            foreach (var d in stream)
+            {
+                double magnitude = d.Magnitude;
+                if (double.IsNaN(magnitude))
+                {
+                    return new Complex(double.NaN, double.NaN);
+                }
+                if (magnitude < minMagnitude || magnitude == minMagnitude && d.Phase < min.Phase)
+                {
+                    minMagnitude = magnitude;
+                    min = d;
+                }
+
+                any = true;
+            }
+
+            return any ? min : new Complex(double.NaN, double.NaN);
+        }
+	}
+}
+
+Here are additional project-specific details referenced in the method:
+
+Complex: A structure representing complex numbers with real and imaginary parts. It provides methods for mathematical operations
+- Constructor: public Complex(double real, double imaginary)
+- Namespace: System.Numerics

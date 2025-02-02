@@ -1,0 +1,112 @@
+The generated MSTest test compiles but fails during execution. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test that does not compile:
+[TestMethod]
+[ExpectedException(typeof(ArgumentNullException))]
+using System;
+using System.Collections.Generic;
+using MathNet.Numerics;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace MathNet.Numerics.Tests
+{
+    [TestMethod]
+public void Evaluate_NullInput_ThrowsArgumentNullException()
+{
+    // Arrange
+    IEnumerable<double> summands = null;
+
+    try
+    {
+        // Act
+        Series.Evaluate(summands);
+        Assert.Fail("Expected ArgumentNullException was not thrown.");
+    }
+    catch (ArgumentNullException)
+    {
+        // Assert
+        Assert.IsTrue(true);
+    }
+}
+
+[TestMethod]
+public void Evaluate_LargeSeries_PerformanceAndCorrectness()
+{
+    // Arrange
+    var summands = new List<double>();
+    for (int i = 0; i < 1_000_000; i++)
+    {
+        summands.Add(1.0 / (i + 1));
+    }
+
+    // Act
+    var result = Series.Evaluate(summands);
+
+    // Assert
+    Assert.IsTrue(result > 14.0 && result < 15.0, "Expected result to be within the approximate range of the harmonic series sum.");
+}}}
+
+Error Messages:
+Here are the error messages reported by the IDE:
+essage: 
+Test method MathNet.Numerics.Tests.SeriesTests.Evaluate_NullInput_ThrowsArgumentNullException threw exception: 
+System.NullReferenceException: Object reference not set to an instance of an object.
+
+Assert.IsTrue failed. Expected result to be within the approximate range of the harmonic series sum.
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the Evaluate method from the Series class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+using System;
+using System.Collections.Generic;
+
+namespace MathNet.Numerics
+{
+    public static class Series
+    {
+        /// <summary>
+        /// Numerically stable series summation (stops automatically).
+        /// </summary>
+        /// <param name="infiniteSummands">provides the summands sequentially</param>
+        /// <returns>Sum</returns>
+        public static double Evaluate(IEnumerable<double> infiniteSummands)
+        {
+            double compensation = 0.0;
+            double current, sum;
+            const double factor = 1 << 16;
+
+            using (var enumerator = infiniteSummands.GetEnumerator())
+            {
+                if (!enumerator.MoveNext())
+                {
+                    return 0.0;
+                }
+
+                sum = enumerator.Current;
+                if (!enumerator.MoveNext())
+                {
+                    return sum;
+                }
+
+                do
+                {
+                    // Kahan Summation
+                    // NOTE (ruegg): do NOT optimize. Now, how to tell that the compiler?
+                    current = enumerator.Current;
+                    double y = current - compensation;
+                    double t = sum + y;
+                    compensation = t - sum;
+                    compensation -= y;
+                    sum = t;
+                } while (Math.Abs(sum) < Math.Abs(factor * current) && enumerator.MoveNext());
+            }
+
+            return sum;
+        }
+    }
+}
+

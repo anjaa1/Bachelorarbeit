@@ -1,0 +1,52 @@
+Create a test class using the MSTest framework to test the Evaluate method from the Series class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+using System;
+using System.Collections.Generic;
+
+namespace MathNet.Numerics
+{
+    public static class Series
+    {
+        /// <summary>
+        /// Numerically stable series summation (stops automatically).
+        /// </summary>
+        /// <param name="infiniteSummands">provides the summands sequentially</param>
+        /// <returns>Sum</returns>
+        public static double Evaluate(IEnumerable<double> infiniteSummands)
+        {
+            double compensation = 0.0;
+            double current, sum;
+            const double factor = 1 << 16;
+
+            using (var enumerator = infiniteSummands.GetEnumerator())
+            {
+                if (!enumerator.MoveNext())
+                {
+                    return 0.0;
+                }
+
+                sum = enumerator.Current;
+                if (!enumerator.MoveNext())
+                {
+                    return sum;
+                }
+
+                do
+                {
+                    // Kahan Summation
+                    // NOTE (ruegg): do NOT optimize. Now, how to tell that the compiler?
+                    current = enumerator.Current;
+                    double y = current - compensation;
+                    double t = sum + y;
+                    compensation = t - sum;
+                    compensation -= y;
+                    sum = t;
+                } while (Math.Abs(sum) < Math.Abs(factor * current) && enumerator.MoveNext());
+            }
+
+            return sum;
+        }
+    }
+}

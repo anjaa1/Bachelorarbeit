@@ -1,0 +1,74 @@
+Create a test class using the MSTest framework to test the SquareRoot method from the ComplexExtensions class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+using System;
+using System.Collections.Generic;
+using Complex = System.Numerics.Complex;
+using System.Runtime;
+
+namespace MathNet.Numerics
+{
+    /// <summary>
+    /// Extension methods for the Complex type provided by System.Numerics
+    /// </summary>
+    public static class ComplexExtensions
+    {
+		/// <summary>
+		/// The Square Root (power 1/2) of this <c>Complex</c>
+		/// </summary>
+		/// <param name="complex">The <see cref="Complex"/> number to perform this operation on.</param>
+		/// <returns>
+		/// The square root of this complex number.
+		/// </returns>
+		public static Complex SquareRoot(this Complex complex)
+		{
+			// Note: the following code should be equivalent to Complex.Sqrt(complex),
+			// but it turns out that is implemented poorly in System.Numerics,
+			// hence we provide our own implementation here. Do not replace.
+
+			if (complex.IsRealNonNegative())
+			{
+				return new Complex(Math.Sqrt(complex.Real), 0.0);
+			}
+
+			Complex result;
+
+			var absReal = Math.Abs(complex.Real);
+			var absImag = Math.Abs(complex.Imaginary);
+			double w;
+			if (absReal >= absImag)
+			{
+				var ratio = complex.Imaginary / complex.Real;
+				w = Math.Sqrt(absReal) * Math.Sqrt(0.5 * (1.0 + Math.Sqrt(1.0 + (ratio * ratio))));
+			}
+			else
+			{
+				var ratio = complex.Real / complex.Imaginary;
+				w = Math.Sqrt(absImag) * Math.Sqrt(0.5 * (Math.Abs(ratio) + Math.Sqrt(1.0 + (ratio * ratio))));
+			}
+
+			if (complex.Real >= 0.0)
+			{
+				result = new Complex(w, complex.Imaginary / (2.0 * w));
+			}
+			else if (complex.Imaginary >= 0.0)
+			{
+				result = new Complex(absImag / (2.0 * w), w);
+			}
+			else
+			{
+				result = new Complex(absImag / (2.0 * w), -w);
+			}
+
+			return result;
+		}
+	}
+}
+
+Here are additional project-specific details referenced in the method:
+
+Complex: A structure representing complex numbers with real and imaginary parts. It provides methods for mathematical operations
+- Constructor: public Complex(double real, double imaginary)
+- Namespace: System.Numerics
+

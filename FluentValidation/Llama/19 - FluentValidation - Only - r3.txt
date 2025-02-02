@@ -1,0 +1,195 @@
+The generated MSTest test does not compile. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test class that does not compile:
+using FluentValidation.TestHelper;
+using FluentValidation.Results;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace FluentValidation.Tests.TestHelper {
+	[TestClass]
+	public class OnlyTests {
+		[TestMethod]
+		public void Only_WithNoFailures_ReturnsSameValidationResult() {
+			// Arrange
+			var validator = new MyValidator();
+			var model = new MyModel();
+			var validationContext = new ValidationContext<MyModel>(model);
+			var failures = validator.Validate(validationContext);
+
+			// Act
+			var result = failures.Only();
+
+			// Assert
+			Assert.AreEqual(failures, result);
+		}
+
+		[TestMethod]
+		public void Only_WithFailures_ReturnsSameValidationResult() {
+			// Arrange
+			var validator = new MyValidator();
+			var model = new MyModel { MyProperty = "Invalid" };
+			var validationContext = new ValidationContext<MyModel>(model);
+			var failures = validator.Validate(validationContext);
+
+			// Act
+			var result = failures.Only();
+
+			// Assert
+			Assert.AreEqual(failures, result);
+		}
+
+		[TestMethod]
+		public void Only_WithUnmatchedFailures_ThrowsException() {
+			// Arrange
+			var validator = new MyValidator();
+			var model = new MyModel();
+			var validationContext = new ValidationContext<MyModel>(model);
+			var failures = validator.Validate(validationContext);
+			var unmatchedFailure = new ValidationFailure { ErrorMessage = "Unmatched Failure" };
+			failures.AddUnmatchedFailure(unmatchedFailure);
+
+			// Act and Assert
+			Assert.ThrowsException<ValidationTestException>(() => failures.Only());
+		}
+
+		[TestMethod]
+		public void Only_WithUnmatchedFailuresFromParent_ThrowsException() {
+			// Arrange
+			var validator = new MyValidator();
+			var model = new MyModel();
+			var validationContext = new ValidationContext<MyModel>(model);
+			var failures = validator.Validate(validationContext);
+			var parentFailures = new TestValidationContinuation { Parent = new TestValidationContinuation { UnmatchedFailures = new List<ValidationFailure> { new ValidationFailure { ErrorMessage = "Unmatched Failure" } } } };
+			var continuation = new TestValidationContinuation { Parent = parentFailures };
+			failures = continuation;
+
+			// Act and Assert
+			Assert.ThrowsException<ValidationTestException>(() => failures.Only());
+		}
+
+		[TestMethod]
+		public void Only_WithNoFailuresAndNoParent_ThrowsException() {
+			// Arrange
+			var validator = new MyValidator();
+			var model = new MyModel();
+			var validationContext = new ValidationContext<MyModel>(model);
+			var failures = validator.Validate(validationContext);
+
+			// Act and Assert
+			Assert.ThrowsException<ValidationTestException>(() => failures.Only());
+		}
+
+		[TestMethod]
+		public void Only_WithNoFailuresAndParentWithFailures_ThrowsException() {
+			// Arrange
+			var validator = new MyValidator();
+			var model = new MyModel();
+			var validationContext = new ValidationContext<MyModel>(model);
+			var failures = validator.Validate(validationContext);
+			var parentFailures = new TestValidationContinuation { UnmatchedFailures = new List<ValidationFailure> { new ValidationFailure { ErrorMessage = "Unmatched Failure" } } };
+			var continuation = new TestValidationContinuation { Parent = parentFailures };
+			failures = continuation;
+
+			// Act and Assert
+			Assert.ThrowsException<ValidationTestException>(() => failures.Only());
+		}
+
+		private class MyValidator : AbstractValidator<MyModel> {
+			public MyValidator() {
+				RuleFor(x => x.MyProperty).NotEmpty();
+			}
+		}
+
+		private class MyModel {
+			public string MyProperty { get; set; }
+		}
+	}
+}
+
+
+Error Messages:
+Here are the error messages reported by the IDE:
+Severity	Code	Description	Line	Details
+Error (active)	CS0122	'TestValidationContinuation' is inaccessible due to its protection level	59	
+Error (active)	CS1929	'ValidationResult' does not contain a definition for 'Only' and the best extension method overload 'ValidationTestExtension.Only(ITestValidationWith)' requires a receiver of type 'FluentValidation.TestHelper.ITestValidationWith'	17	
+Error (active)	CS0411	The type arguments for method 'Assert.AreEqual<T>(T?, T?)' cannot be inferred from the usage. Try specifying the type arguments explicitly.	20	
+Error (active)	CS1929	'ValidationResult' does not contain a definition for 'Only' and the best extension method overload 'ValidationTestExtension.Only(ITestValidationWith)' requires a receiver of type 'FluentValidation.TestHelper.ITestValidationWith'	32	
+Error (active)	CS0411	The type arguments for method 'Assert.AreEqual<T>(T?, T?)' cannot be inferred from the usage. Try specifying the type arguments explicitly.	35	
+Error (active)	CS1061	'ValidationResult' does not contain a definition for 'AddUnmatchedFailure' and no accessible extension method 'AddUnmatchedFailure' accepting a first argument of type 'ValidationResult' could be found (are you missing a using directive or an assembly reference?)	46	
+Error (active)	CS1929	'ValidationResult' does not contain a definition for 'Only' and the best extension method overload 'ValidationTestExtension.Only(ITestValidationWith)' requires a receiver of type 'FluentValidation.TestHelper.ITestValidationWith'	49	
+Error (active)	CS0122	'TestValidationContinuation' is inaccessible due to its protection level	59	
+Error (active)	CS0122	'TestValidationContinuation' is inaccessible due to its protection level	60	
+Error (active)	CS1929	'ValidationResult' does not contain a definition for 'Only' and the best extension method overload 'ValidationTestExtension.Only(ITestValidationWith)' requires a receiver of type 'FluentValidation.TestHelper.ITestValidationWith'	64	
+Error (active)	CS1929	'ValidationResult' does not contain a definition for 'Only' and the best extension method overload 'ValidationTestExtension.Only(ITestValidationWith)' requires a receiver of type 'FluentValidation.TestHelper.ITestValidationWith'	76	
+Error (active)	CS0122	'TestValidationContinuation' is inaccessible due to its protection level	86	
+Error (active)	CS0122	'TestValidationContinuation' is inaccessible due to its protection level	87	
+Error (active)	CS1929	'ValidationResult' does not contain a definition for 'Only' and the best extension method overload 'ValidationTestExtension.Only(ITestValidationWith)' requires a receiver of type 'FluentValidation.TestHelper.ITestValidationWith'	91	
+
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the Only method from the ValidationTestExtension class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+namespace FluentValidation.TestHelper;
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+using Internal;
+using Results;
+using Validators;
+
+public static class ValidationTestExtension {
+	internal const string MatchAnyFailure = "__FV__ANY";
+
+	public static ITestValidationWith Only(this ITestValidationWith failures) {
+		var unmatchedFailures = failures.UnmatchedFailures;
+		var continuation = (TestValidationContinuation) failures;
+
+		// Also add in any unmatched failures from the parent (if there is one) recursively.
+		do {
+			if (continuation.Parent != null) {
+				unmatchedFailures = unmatchedFailures.Union(continuation.Parent.UnmatchedFailures);
+			}
+			continuation = continuation.Parent as TestValidationContinuation;
+		} while (continuation != null);
+
+		var unmatchedFailuresList = unmatchedFailures.ToList();
+
+		if (unmatchedFailuresList.Count > 0) {
+			var errorMessageBanner = "Expected to have errors only matching specified conditions";
+			string errorMessageDetails = "";
+			for (int i = 0; i < unmatchedFailuresList.Count; i++) {
+				errorMessageDetails += $"[{i}]: {unmatchedFailuresList[i].ErrorMessage}\n";
+			}
+			var errorMessage = $"{errorMessageBanner}\n----\nUnexpected Errors:\n{errorMessageDetails}";
+
+			throw new ValidationTestException(errorMessage);
+		}
+		return failures;
+	}
+}
+
+Here are additional project-specific details referenced in the method:
+ITestValidationWith
+- interface: public interface ITestValidationWith : ITestValidationContinuation {
+}
+- namespace: FluentValidation.TestHelper
+- Inherits: ITestValidationContinuation
+
+ITestValidationContinuation
+- namespace: FluentValidation.TestHelper
+- interface: public interface ITestValidationContinuation : IEnumerable<ValidationFailure> {
+	IEnumerable<ValidationFailure> UnmatchedFailures { get; }
+}
+- Properties: IEnumerable<ValidationFailure> UnmatchedFailures
+- methods: IEnumerator<ValidationFailure> GetEnumerator()
+- dependencies: ValidationFailure (Namespace: FluentValidation.Results)
+

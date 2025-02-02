@@ -1,0 +1,74 @@
+The generated MSTest test compiles but fails during execution. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test that does not compile:
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MathNet.Numerics.Distributions;
+using System;
+
+namespace MathNet.Numerics.Tests.Distributions
+{
+    [TestClass]
+    public class ChiSquaredTests
+    {
+        [DataRow(5.0, 0.1, 0.00496837417587872)] // Edge case: small x
+        [DataRow(160.0, 80.0, 1.354024637831267e-28)] // Edge case: large degrees of freedom
+        public void PDF_ValidInputs_ReturnsExpectedDensity(double freedom, double x, double expected)
+        {
+            // Act
+            double actual = ChiSquared.PDF(freedom, x);
+
+            // Assert
+            Assert.AreEqual(expected, actual, 1e-12, "PDF did not return the expected value.");
+        }
+	}
+}
+
+Error Messages:
+Here are the error messages reported by the IDE:
+Assert.AreEqual failed. Expected a difference no greater than <1E-12> between expected value <0,00496837417587872> and actual value <0,004000129828100442>. PDF did not return the expected value.
+Assert.AreEqual failed. Expected a difference no greater than <1E-12> between expected value <1,354024637831267E-28> and actual value <8,675455922569073E-09>. PDF did not return the expected value.
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the PDF method from the ChiSquared class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+using System;
+using System.Collections.Generic;
+using MathNet.Numerics.Random;
+using MathNet.Numerics.Threading;
+
+namespace MathNet.Numerics.Distributions
+{
+    public class ChiSquared : IContinuousDistribution
+    {
+        /// <summary>
+        /// Computes the probability density of the distribution (PDF) at x, i.e. ∂P(X ≤ x)/∂x.
+        /// </summary>
+        /// <param name="freedom">The degrees of freedom (k) of the distribution. Range: k > 0.</param>
+        /// <param name="x">The location at which to compute the density.</param>
+        /// <returns>the density at <paramref name="x"/>.</returns>
+        /// <seealso cref="Density"/>
+        public static double PDF(double freedom, double x)
+        {
+            if (freedom <= 0.0)
+            {
+                throw new ArgumentException("Invalid parametrization for the distribution.");
+            }
+
+            if (double.IsPositiveInfinity(freedom) || double.IsPositiveInfinity(x) || x == 0.0)
+            {
+                return 0.0;
+            }
+
+            if (freedom > 160.0)
+            {
+                return Math.Exp(PDFLn(freedom, x));
+            }
+
+            return (Math.Pow(x, (freedom / 2.0) - 1.0) * Math.Exp(-x / 2.0)) / (Math.Pow(2.0, freedom / 2.0) * SpecialFunctions.Gamma(freedom / 2.0));
+        }
+    }
+}

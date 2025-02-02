@@ -1,0 +1,149 @@
+The generated MSTest test does not compile. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test class that does not compile:
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using MathNet.Numerics.Distributions;
+
+namespace MathNet.Numerics.Tests.DistributionsTests
+{
+    [TestClass]
+    public class ChiSquaredTests
+    {
+        private const double Precision = 1e-10;
+
+        [TestMethod]
+        public void PDF_ValidInputs_ReturnsExpectedValue()
+        {
+            // Known values calculated using statistical software
+            var testCases = new[]
+            {
+                (freedom: 1.0, x: 1.0, expected: 0.241970724519143),
+                (freedom: 2.0, x: 1.0, expected: 0.303265329856317),
+                (freedom: 5.0, x: 2.0, expected: 0.180031876845467)
+            };
+
+            foreach (var (freedom, x, expected) in testCases)
+            {
+                double actual = ChiSquared.PDF(freedom, x);
+                Assert.AreEqual(expected, actual, Precision,
+                    $"PDF failed for freedom={freedom}, x={x}");
+            }
+        }
+
+        [TestMethod]
+        public void PDF_ZeroX_ReturnsZero()
+        {
+            double result = ChiSquared.PDF(1.0, 0.0);
+            Assert.AreEqual(0.0, result);
+        }
+
+        [TestMethod]
+        public void PDF_LargeDegreesOfFreedom_ReturnsNonZeroValue()
+        {
+            // Test with freedom > 160 to trigger the PDFLn path
+            double result = ChiSquared.PDF(161.0, 161.0);
+            Assert.IsTrue(result > 0.0);
+            Assert.IsFinite(result);
+        }
+
+        [TestMethod]
+        public void PDF_InfiniteX_ReturnsZero()
+        {
+            double result = ChiSquared.PDF(1.0, double.PositiveInfinity);
+            Assert.AreEqual(0.0, result);
+        }
+
+        [TestMethod]
+        public void PDF_InfiniteDegreesOfFreedom_ReturnsZero()
+        {
+            double result = ChiSquared.PDF(double.PositiveInfinity, 1.0);
+            Assert.AreEqual(0.0, result);
+        }
+
+        [TestMethod]
+        [DataRow(0.0)]  // Zero degrees of freedom
+        [DataRow(-1.0)] // Negative degrees of freedom
+        public void PDF_InvalidDegreesOfFreedom_ThrowsArgumentException(double freedom)
+        {
+            Assert.ThrowsException<ArgumentException>(() => ChiSquared.PDF(freedom, 1.0),
+                "PDF should throw ArgumentException for invalid degrees of freedom");
+        }
+
+        [TestMethod]
+        public void PDF_NegativeX_ReturnsValidResult()
+        {
+            // The implementation doesn't explicitly handle negative x values,
+            // but we should test the behavior for completeness
+            double result = ChiSquared.PDF(1.0, -1.0);
+            Assert.IsFinite(result);
+        }
+
+        [TestMethod]
+        public void PDF_SpecialCases_HandledCorrectly()
+        {
+            // Test with very small values
+            Assert.IsFinite(ChiSquared.PDF(0.1, 0.1));
+
+            // Test with very large finite values
+            Assert.IsFinite(ChiSquared.PDF(100.0, 1000.0));
+
+            // Test with values close to machine epsilon
+            Assert.IsFinite(ChiSquared.PDF(1.0, double.Epsilon));
+        }
+    }
+}
+
+
+Error Messages:
+Here are the error messages reported by the IDE:
+Severity	Code	Description	Line	Details
+Error (active)	CS0117	'Assert' does not contain a definition for 'IsFinite'	44	
+Error (active)	CS0117	'Assert' does not contain a definition for 'IsFinite'	76	
+Error (active)	CS0117	'Assert' does not contain a definition for 'IsFinite'	83	
+Error (active)	CS0117	'Assert' does not contain a definition for 'IsFinite'	86	
+Error (active)	CS0117	'Assert' does not contain a definition for 'IsFinite'	89	
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the PDF method from the ChiSquared class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+using System;
+using System.Collections.Generic;
+using MathNet.Numerics.Random;
+using MathNet.Numerics.Threading;
+
+namespace MathNet.Numerics.Distributions
+{
+    public class ChiSquared : IContinuousDistribution
+    {
+        /// <summary>
+        /// Computes the probability density of the distribution (PDF) at x, i.e. ∂P(X ≤ x)/∂x.
+        /// </summary>
+        /// <param name="freedom">The degrees of freedom (k) of the distribution. Range: k > 0.</param>
+        /// <param name="x">The location at which to compute the density.</param>
+        /// <returns>the density at <paramref name="x"/>.</returns>
+        /// <seealso cref="Density"/>
+        public static double PDF(double freedom, double x)
+        {
+            if (freedom <= 0.0)
+            {
+                throw new ArgumentException("Invalid parametrization for the distribution.");
+            }
+
+            if (double.IsPositiveInfinity(freedom) || double.IsPositiveInfinity(x) || x == 0.0)
+            {
+                return 0.0;
+            }
+
+            if (freedom > 160.0)
+            {
+                return Math.Exp(PDFLn(freedom, x));
+            }
+
+            return (Math.Pow(x, (freedom / 2.0) - 1.0) * Math.Exp(-x / 2.0)) / (Math.Pow(2.0, freedom / 2.0) * SpecialFunctions.Gamma(freedom / 2.0));
+        }
+    }
+}

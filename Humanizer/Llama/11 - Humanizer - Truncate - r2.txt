@@ -1,0 +1,213 @@
+The generated MSTest test does not compile. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test class that does not compile:
+using Humanizer;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+
+namespace UnitTests {
+    [TestClass]
+    public class TruncateExtensionsTests {
+        [TestMethod]
+        public void TruncateExtensions_TypicalUseCase() {
+            // Arrange
+            var truncator = new Truncator();
+            var input = "Hello, World!";
+            var expected = "Hello, Worl";
+            var length = 10;
+            var truncationString = "...";
+            var from = TruncateFrom.Right;
+
+            // Act
+            var result = truncator.Truncate(input, length, truncationString, from);
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [TestMethod]
+        public void TruncateExtensions_TypicalUseCase_Left() {
+            // Arrange
+            var truncator = new Truncator();
+            var input = "Hello, World!";
+            var expected = "ello, Worl";
+            var length = 10;
+            var truncationString = "...";
+            var from = TruncateFrom.Left;
+
+            // Act
+            var result = truncator.Truncate(input, length, truncationString, from);
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [TestMethod]
+        public void TruncateExtensions_TypicalUseCase_NullInput() {
+            // Arrange
+            var truncator = new Truncator();
+            var input = null;
+            var expected = null;
+            var length = 10;
+            var truncationString = "...";
+            var from = TruncateFrom.Right;
+
+            // Act
+            var result = truncator.Truncate(input, length, truncationString, from);
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [TestMethod]
+        public void TruncateExtensions_TypicalUseCase_NullTruncator() {
+            // Arrange
+            var input = "Hello, World!";
+            var expected = null;
+            var length = 10;
+            var truncationString = "...";
+            var from = TruncateFrom.Right;
+            var truncator = null;
+
+            // Act and Assert
+            Assert.ThrowsException<ArgumentNullException>(() => Truncate(input, length, truncationString, truncator, from));
+        }
+
+        [TestMethod]
+        public void TruncateExtensions_TypicalUseCase_ZeroLength() {
+            // Arrange
+            var truncator = new Truncator();
+            var input = "Hello, World!";
+            var expected = input;
+            var length = 0;
+            var truncationString = "...";
+            var from = TruncateFrom.Right;
+
+            // Act
+            var result = truncator.Truncate(input, length, truncationString, from);
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [TestMethod]
+        public void TruncateExtensions_TypicalUseCase_NegativeLength() {
+            // Arrange
+            var truncator = new Truncator();
+            var input = "Hello, World!";
+            var expected = input;
+            var length = -1;
+            var truncationString = "...";
+            var from = TruncateFrom.Right;
+
+            // Act
+            var result = truncator.Truncate(input, length, truncationString, from);
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+    }
+}
+
+public class Truncator : ITruncator {
+    public string? Truncate(string? value, int length, string? truncationString, TruncateFrom truncateFrom = TruncateFrom.Right) {
+        if (value == null) {
+            return null;
+        }
+
+        if (length <= 0) {
+            return value;
+        }
+
+        var truncatedValue = value.Length <= length ? value : value.Substring(0, length);
+
+        if (truncatedValue.Length < length) {
+            var remainingLength = length - truncatedValue.Length;
+            var truncationStringLength = truncationString?.Length ?? 0;
+            if (remainingLength > truncationStringLength) {
+                return truncatedValue + truncationString!.Repeat(remainingLength - truncationStringLength);
+            }
+            else {
+                return truncatedValue + truncationString!.Substring(0, remainingLength);
+            }
+        }
+        else {
+            return truncatedValue;
+        }
+    }
+}
+
+public interface ITruncator {
+    string? Truncate(string? value, int length, string? truncationString, TruncateFrom truncateFrom = TruncateFrom.Right);
+}
+
+Error Messages:
+Here are the error messages reported by the IDE:
+Severity	Code	Description	Line	Details
+Error (active)	CS0815	Cannot assign <null> to an implicitly-typed variable	46	
+Error (active)	CS0815	Cannot assign <null> to an implicitly-typed variable	47	
+Error (active)	CS0815	Cannot assign <null> to an implicitly-typed variable	63	
+Error (active)	CS0815	Cannot assign <null> to an implicitly-typed variable	67	
+Error (active)	CS0103	The name 'Truncate' does not exist in the current context	70	
+Error (active)	CS1061	'string' does not contain a definition for 'Repeat' and no accessible extension method 'Repeat' accepting a first argument of type 'string' could be found (are you missing a using directive or an assembly reference?)	125	
+
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the Truncate method from the TruncateExtensions class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+namespace Humanizer;
+
+/// <summary>
+/// Allow strings to be truncated
+/// </summary>
+public static class TruncateExtensions
+{
+    /// <summary>
+    /// Truncate the string
+    /// </summary>
+    /// <param name="input">The string to be truncated</param>
+    /// <param name="length">The length to truncate to</param>
+    /// <param name="truncationString">The string used to truncate with</param>
+    /// <param name="truncator">The truncator to use</param>
+    /// <param name="from">The enum value used to determine from where to truncate the string</param>
+    /// <returns>The truncated string</returns>
+    [return: NotNullIfNotNull(nameof(input))]
+    public static string? Truncate(this string? input, int length, string? truncationString, ITruncator truncator, TruncateFrom from = TruncateFrom.Right)
+    {
+        if (truncator == null)
+        {
+            throw new ArgumentNullException(nameof(truncator));
+        }
+
+        if (input == null)
+        {
+            return null;
+        }
+
+        return truncator.Truncate(input, length, truncationString, from);
+    }
+}
+
+Here are additional project-specific details referenced in the method:
+TruncateFrom: Truncation location for humanizer
+- Namespace: Humanizer
+- Values:
+  - `Left`: Truncate letters from the left (start) of the string.
+  - `Right`: Truncate letters from the right (end) of the string.
+  
+
+ITruncator: Can truncate a string
+- Namespace: Humanizer
+- Method:
+- Truncate(string? value, int length, string? truncationString, TruncateFrom truncateFrom = TruncateFrom.Right)
+- Parameters:
+	- value: The string to truncate
+	- langth: The Length to truncate
+	- truncationString: The string used to truncate with
+	- TruncateFrom: The enum value used to determine from where to truncate the string
+	- returns: string or null if value is null
+

@@ -1,0 +1,13 @@
+The generated MSTest test does not compile. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test class that does not compile:
+[Insert test class]
+
+Error Messages:
+Here are the error messages reported by the IDE:
+[Insert error message]
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+[copy the inital prompt]

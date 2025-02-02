@@ -1,0 +1,81 @@
+The generated MSTest test compiles but fails during execution. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test that does not compile:
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Humanizer;
+
+namespace Humanizer.Tests {
+    [TestClass]
+    public class StringHumanizeExtensionsTests {
+        [TestMethod]
+        public void Humanize_WithSingleCharacter_ReturnsSameCharacter() {
+            // Arrange
+            string input = "x";
+
+            // Act
+            string result = input.Humanize();
+
+            // Assert
+            Assert.AreEqual("x", result);
+        }
+		Here are the error messages reported by the IDE:
+		Assert.AreEqual failed. Expected:<x>. Actual:<X>. 
+
+        [TestMethod]
+        public void Humanize_WithConsecutiveUnderscores_HandlesThemCorrectly() {
+            // Arrange
+            string input = "multiple__underscores___test";
+
+            // Act
+            string result = input.Humanize();
+
+            // Assert
+            Assert.AreEqual("Multiple underscores test", result);
+        }
+		Here are the error messages reported by the IDE:
+		Assert.AreEqual failed. Expected:<Multiple underscores test>. Actual:<multiple  underscores   test>. 
+	}
+}
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the Humanize method from the StringHumanizeExtensions class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+namespace Humanizer;
+
+/// <summary>
+/// Contains extension methods for humanizing string values.
+/// </summary>
+public static class StringHumanizeExtensions
+{
+    /// <summary>
+    /// Humanizes the input string; e.g. Underscored_input_String_is_turned_INTO_sentence -> 'Underscored input String is turned INTO sentence'
+    /// </summary>
+    /// <param name="input">The string to be humanized</param>
+    public static string Humanize(this string input)
+    {
+        // if input is all capitals (e.g. an acronym) then return it without change
+        if (input.All(char.IsUpper))
+        {
+            return input;
+        }
+
+        // if input contains a dash or underscore which precedes or follows a space (or both, e.g. free-standing)
+        // remove the dash/underscore and run it through FromPascalCase
+        if (FreestandingSpacingCharRegex.IsMatch(input))
+        {
+            return FromPascalCase(FromUnderscoreDashSeparatedWords(input));
+        }
+
+        if (input.Contains("_") || input.Contains("-"))
+        {
+            return FromUnderscoreDashSeparatedWords(input);
+        }
+
+        return FromPascalCase(input);
+    }
+}
+
+

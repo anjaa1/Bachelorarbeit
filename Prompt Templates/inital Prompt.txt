@@ -1,0 +1,4 @@
+Create a test class using the MSTest framework to test the <insert Name here> method from the <insert class name> class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+The method to be tested is: [Insert method signature or definition].  
+
+Here are additional project-specific details referenced in the method: [List any project-specific classes/methods/interfaces required for context].

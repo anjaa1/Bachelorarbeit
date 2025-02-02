@@ -1,0 +1,158 @@
+The generated MSTest test compiles but fails during execution. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test that does not compile:
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using FluentValidation;
+using FluentValidation.Internal;
+using Moq;
+using System.Collections.Generic;
+
+namespace FluentValidation.Tests {
+	[TestClass]
+	public class RulesetValidatorSelectorTests {
+		private Mock<IValidationRule> _ruleMock;
+		private Mock<IValidationContext> _contextMock;
+		private Dictionary<string, object> _rootContextData;
+
+		[TestInitialize]
+		public void Setup() {
+			_ruleMock = new Mock<IValidationRule>();
+			_contextMock = new Mock<IValidationContext>();
+			_rootContextData = new Dictionary<string, object>();
+			_contextMock.Setup(c => c.RootContextData).Returns(_rootContextData);
+		}
+				[TestMethod]
+		public void CanExecute_CaseInsensitiveMatch_ReturnsTrue() {
+			// Arrange
+			var selector = new RulesetValidatorSelector(new[] { "ruleset1" });
+			_ruleMock.SetupGet(r => r.RuleSets).Returns(new[] { "RULESET1" });
+
+			// Act
+			var result = selector.CanExecute(_ruleMock.Object, "propertyPath", _contextMock.Object);
+
+			// Assert
+			Assert.IsTrue(result);
+			var executedRuleSets = (HashSet<string>)_rootContextData["_FV_RuleSetsExecuted"];
+			Assert.IsTrue(executedRuleSets.Contains("ruleset1"));
+		}}}
+
+Error Messages:
+Here are the error messages reported by the IDE:
+Assert.IsTrue failed. 
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the CanExecute method from the RulesetValidatorSelector class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+namespace FluentValidation.Internal;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+/// <summary>
+/// Selects validators that belong to the specified rulesets.
+/// </summary>
+public class RulesetValidatorSelector : IValidatorSelector {
+	readonly IEnumerable<string> _rulesetsToExecute;
+	public const string DefaultRuleSetName = "default";
+	public const string WildcardRuleSetName = "*";
+	internal static readonly string[] DefaultRuleSetNameInArray = new string[] { DefaultRuleSetName };
+
+	/// <summary>
+	/// Rule sets
+	/// </summary>
+	public IEnumerable<string> RuleSets => _rulesetsToExecute;
+
+	/// <summary>
+	/// Creates a new instance of the RulesetValidatorSelector.
+	/// </summary>
+	public RulesetValidatorSelector(IEnumerable<string> rulesetsToExecute) {
+		_rulesetsToExecute = rulesetsToExecute;
+	}
+
+
+	/// <summary>
+	/// Determines whether or not a rule should execute.
+	/// </summary>
+	/// <param name="rule">The rule</param>
+	/// <param name="propertyPath">Property path (eg Customer.Address.Line1)</param>
+	/// <param name="context">Contextual information</param>
+	/// <returns>Whether or not the validator can execute.</returns>
+	public virtual bool CanExecute(IValidationRule rule, string propertyPath, IValidationContext context) {
+		var executed = context.RootContextData.GetOrAdd("_FV_RuleSetsExecuted", () => new HashSet<string>());
+
+		if ((rule.RuleSets == null || rule.RuleSets.Length == 0) && _rulesetsToExecute.Any()) {
+			if (IsIncludeRule(rule)) {
+				return true;
+			}
+		}
+
+		if ((rule.RuleSets == null || rule.RuleSets.Length == 0) && !_rulesetsToExecute.Any()) {
+			executed.Add(DefaultRuleSetName);
+			return true;
+		}
+
+		if (_rulesetsToExecute.Contains(DefaultRuleSetName, StringComparer.OrdinalIgnoreCase)) {
+			if (rule.RuleSets == null || rule.RuleSets.Length == 0 || rule.RuleSets.Contains(DefaultRuleSetName, StringComparer.OrdinalIgnoreCase)) {
+				executed.Add(DefaultRuleSetName);
+				return true;
+			}
+		}
+
+		if (rule.RuleSets != null && rule.RuleSets.Length > 0 && _rulesetsToExecute.Any()) {
+			var intersection = rule.RuleSets.Intersect(_rulesetsToExecute, StringComparer.OrdinalIgnoreCase).ToList();
+			if (intersection.Any()) {
+				intersection.ForEach(r => executed.Add(r));
+				return true;
+			}
+		}
+
+		if (_rulesetsToExecute.Contains(WildcardRuleSetName)) {
+			if (rule.RuleSets == null || rule.RuleSets.Length == 0) {
+				executed.Add(DefaultRuleSetName);
+			}
+			else {
+				foreach (var r in rule.RuleSets) {
+					executed.Add(r);
+				}
+			}
+			return true;
+		}
+
+		return false;
+	}
+}
+
+Here are additional project-specific details referenced in the method:
+IValidationRule
+- namespace: FluentValidation
+- Properties:
+	- IEnumerable<IRuleComponent> Components: The components in this rule.
+	- string[] RuleSets { get; set; }: Name of the rule-set to which this rule belongs.
+	- string PropertyName { get; set; }: Returns the property name for the property being validated. Returns null if it is not a property being validated (eg a method call).
+	- MemberInfo Member: Property associated with this rule.
+	- Type TypeToValidate: Type of the property being validated.
+	- bool HasCondition: Whether the rule has a condition defined.
+	- bool HasAsyncCondition: Whether the rule has an async condition defined.
+	- LambdaExpression Expression: Expression that was used to create the rule.
+	- IEnumerable<IValidationRule> DependentRules: Dependent rules.
+- Methods:
+- string GetDisplayName(IValidationContext context): Gets the display name for the property.
+
+IValidationContext
+- namespace: FluentValidation
+- Properties:
+    - object InstanceToValidate: The object currently being validated.
+    - IDictionary<string, object> RootContextData: Additional data associated with the validation request.
+    - PropertyChain PropertyChain: Property chain.
+    - IValidatorSelector Selector: Selector.
+    - bool IsChildContext: Whether this is a child context.
+    - bool IsChildCollectionContext: Whether this is a child collection context.
+    - IValidationContext ParentContext: Parent validation context.
+    - bool IsAsync: Whether this context is async.
+    - bool ThrowOnFailures: Whether the validator should throw an exception if validation fails (default is false).
+

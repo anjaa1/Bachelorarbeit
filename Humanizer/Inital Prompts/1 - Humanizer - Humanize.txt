@@ -1,0 +1,48 @@
+Create a test class using the MSTest framework to test the Humanize method from the DateHumanizeExtensions class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+namespace Humanizer;
+
+/// <summary>
+/// Humanizes DateTime into human readable sentence
+/// </summary>
+public static class DateHumanizeExtensions
+{
+    public static string Humanize(this DateTime? input, bool? utcDate = null, DateTime? dateToCompareAgainst = null, CultureInfo? culture = null)
+    {
+        if (input.HasValue)
+        {
+            return Humanize(input.Value, utcDate, dateToCompareAgainst, culture);
+        }
+
+        return Configurator
+            .GetFormatter(culture)
+            .DateHumanize_Never();
+    }
+}
+
+Here are additional project-specific details referenced in the method:
+
+Configurator: Provides a configuration point for Humanizer
+- Namespace: Humanizer
+- Details:
+	- Regristries:
+		- CollectionFormatters: A registry of formatters used to format collections based on the current locale
+		- Formatters: Registry for string formatters based on the current locale.
+		- NumberToWordsConverters: Registry for number-to-words converters for localization.
+		- Ordinalizers: Registry for ordinalizers used in localization.
+		- DateToOrdinalWordsConverters: Registry for date-to-ordinal-word converters.
+		- DateOnlyToOrdinalWordsConverters (NET6.0+): Registry for date-only ordinal converters.
+		- TimeOnlyToClockNotationConverters (NET6.0+): Registry for time-only to clock notation converters.
+- Strategies:
+	- DateTimeHumanizeStrategy: Defines the strategy for humanizing DateTime.
+	- DateTimeOffsetHumanizeStrategy: Defines the strategy for humanizing DateTimeOffset.
+	- DateOnlyHumanizeStrategy (NET6.0+): Defines the strategy for humanizing DateOnly.
+	- TimeOnlyHumanizeStrategy (NET6.0+): Defines the strategy for humanizing TimeOnly
+- Methods:
+	- public static void UseEnumDescriptionPropertyLocator(Func<PropertyInfo, bool> func): Sets a predicate for locating description properties for enums.
+
+Humanize: Turns the current or provided date into human readable sentence
+- returns: distance of time in words
+- method signature: public static string Humanize(this DateTime input, bool? utcDate = null, DateTime? dateToCompareAgainst = null, CultureInfo? culture = null)

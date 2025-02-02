@@ -1,0 +1,149 @@
+The generated MSTest test does not compile. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test class that does not compile:
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace Humanizer.Tests {
+    [TestClass]
+    public class EnumHumanizeExtensionsTests {
+        [TestMethod]
+        public void Test_Humanize_Typical_Case() {
+            // Arrange
+            var enumMember = DayOfWeek.Sunday;
+
+            // Act
+            var result = enumMember.Humanize();
+
+            // Assert
+            Assert.AreEqual("Sunday", result);
+        }
+
+        [TestMethod]
+        public void Test_Humanize_Edge_Case_Flag() {
+            // Arrange
+            var enumMember = Color.Red | Color.Green;
+
+            // Act
+            var result = enumMember.Humanize();
+
+            // Assert
+            Assert.AreEqual("Red, Green", result);
+        }
+
+        [TestMethod]
+        public void Test_Humanize_Edge_Case_Flag_Multiple() {
+            // Arrange
+            var enumMember = Color.Red | Color.Green | Color.Blue;
+
+            // Act
+            var result = enumMember.Humanize();
+
+            // Assert
+            Assert.AreEqual("Red, Green, Blue", result);
+        }
+
+        [TestMethod]
+        public void Test_Humanize_Invalid_Input() {
+            // Arrange
+            var invalidEnumMember = 10;
+
+            // Act and Assert
+            Assert.ThrowsException<InvalidCastException>(() => invalidEnumMember.Humanize());
+        }
+
+        [TestMethod]
+        public void Test_Humanize_Null_Input() {
+            // Arrange
+            var nullEnumMember = (DayOfWeek?)null;
+
+            // Act and Assert
+            Assert.ThrowsException<NullReferenceException>(() => nullEnumMember.Humanize());
+        }
+
+        [TestMethod]
+        public void Test_Humanize_Null_Flag() {
+            // Arrange
+            var nullEnumMember = (Color?)null;
+
+            // Act and Assert
+            Assert.ThrowsException<NullReferenceException>(() => nullEnumMember.Humanize());
+        }
+    }
+
+    public class Color {
+        public static Color Red = 1;
+        public static Color Green = 2;
+        public static Color Blue = 4;
+    }
+
+    public class DayOfWeek {
+        public static DayOfWeek Sunday = 0;
+        public static DayOfWeek Monday = 1;
+        public static DayOfWeek Tuesday = 2;
+    }
+}
+
+Error Messages:
+Here are the error messages reported by the IDE:
+Severity	Code	Description	Line	Details
+Error (active)	CS0315	The type 'int' cannot be used as type parameter 'T' in the generic type or method 'EnumHumanizeExtensions.Humanize<T>(T)'. There is no boxing conversion from 'int' to 'System.Enum'.	52	
+Error (active)	CS0453	The type 'DayOfWeek' must be a non-nullable value type in order to use it as parameter 'T' in the generic type or method 'EnumHumanizeExtensions.Humanize<T>(T)'	16	
+Error (active)	CS0019	Operator '|' cannot be applied to operands of type 'Color' and 'Color'	25	
+Error (active)	CS0019	Operator '|' cannot be applied to operands of type 'Color' and 'Color'	37	
+Error (active)	CS0453	The type 'DayOfWeek' must be a non-nullable value type in order to use it as parameter 'T' in the generic type or method 'EnumHumanizeExtensions.Humanize<T>(T)'	61	
+Error (active)	CS0453	The type 'Color' must be a non-nullable value type in order to use it as parameter 'T' in the generic type or method 'EnumHumanizeExtensions.Humanize<T>(T)'	70	
+Error (active)	CS0029	Cannot implicitly convert type 'int' to 'Humanizer.Tests.Color'	75	
+Error (active)	CS0029	Cannot implicitly convert type 'int' to 'Humanizer.Tests.Color'	76	
+Error (active)	CS0029	Cannot implicitly convert type 'int' to 'Humanizer.Tests.Color'	77	
+Error (active)	CS0029	Cannot implicitly convert type 'int' to 'Humanizer.Tests.DayOfWeek'	81	
+Error (active)	CS0029	Cannot implicitly convert type 'int' to 'Humanizer.Tests.DayOfWeek'	82	
+Error (active)	CS0029	Cannot implicitly convert type 'int' to 'Humanizer.Tests.DayOfWeek'	83	
+
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the Humanize method from the EnumHumanizeExtensions class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+namespace Humanizer;
+
+/// <summary>
+/// Contains extension methods for humanizing Enums
+/// </summary>
+public static class EnumHumanizeExtensions
+{
+    /// <summary>
+    /// Turns an enum member into a human readable string; e.g. AnonymousUser -> Anonymous user. It also honors DescriptionAttribute data annotation
+    /// </summary>
+    /// <param name="input">The enum member to be humanized</param>
+    public static string Humanize<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)] T>(this T input)
+        where T : struct, Enum
+    {
+        var (zero, humanized, values) = EnumCache<T>.GetInfo();
+        if (EnumCache<T>.TreatAsFlags(input))
+        {
+            return values
+                .Where(_ => _.CompareTo(zero) != 0 &&
+                            input.HasFlag(_))
+                .Select(_ => _.Humanize())
+                .Humanize();
+        }
+
+        return humanized[input];
+    }
+}
+
+Here are additional project-specific details referenced in the method:
+EnumCache<T>: A static utility class for caching metadata and processing enums.
+- Namespace: Humanizer
+- Methods:
+  - `static (T Zero, FrozenDictionary<T, string> Humanized, FrozenSet<T> Values) GetInfo()`
+  - `static Dictionary<string, T> GetDehumanized()`
+  - `static bool TreatAsFlags(T input)`
+

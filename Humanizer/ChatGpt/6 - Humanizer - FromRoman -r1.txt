@@ -1,0 +1,82 @@
+The generated MSTest test compiles but fails during execution. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test that does not compile:
+using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Humanizer; // Assuming the namespace contains the RomanNumeralExtensions class
+
+namespace RomanNumeralExtensionsTests {
+    [TestClass]
+    public class RomanNumeralExtensionsTests {
+        [TestMethod]
+        public void FromRoman_CaseInsensitiveInput_HandlesCorrectly() {
+            // Arrange
+            string input = "mMxXvV"; // Mixed case input
+            int expected = 2025;
+
+            // Act
+            int result = RomanNumeralExtensions.FromRoman(input);
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }}}
+
+Error Messages:
+Here are the error messages reported by the IDE:
+ Test method RomanNumeralExtensionsTests.RomanNumeralExtensionsTests.FromRoman_CaseInsensitiveInput_HandlesCorrectly threw exception: 
+System.ArgumentException: Empty or invalid Roman numeral string. (Parameter 'input')
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the FromRoman method from the RomanNumeralExtensions class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+using System.Diagnostics;
+
+namespace Humanizer;
+
+/// <summary>
+/// Contains extension methods for changing a number to Roman representation (ToRoman) and from Roman representation back to the number (FromRoman)
+/// </summary>
+public static class RomanNumeralExtensions
+{
+    /// <summary>
+    /// Converts Roman numbers into integer
+    /// </summary>
+    /// <param name="input">Roman number</param>
+    /// <returns>Human-readable number</returns>
+    public static int FromRoman(CharSpan input)
+    {
+        input = input.Trim();
+
+        var length = input.Length;
+
+        if (length == 0 || IsInvalidRomanNumeral(input))
+        {
+            throw new ArgumentException("Empty or invalid Roman numeral string.", nameof(input));
+        }
+
+        var total = 0;
+        var i = length;
+
+        while (i > 0)
+        {
+            var digit = GetRomanNumeralCharValue(input[--i]);
+            if (i > 0)
+            {
+                var previousDigit = GetRomanNumeralCharValue(input[i - 1]);
+                if (previousDigit < digit)
+                {
+                    digit -= previousDigit;
+                    i--;
+                }
+            }
+
+            total += digit;
+        }
+
+        return total;
+    }
+}
+

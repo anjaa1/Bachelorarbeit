@@ -1,0 +1,148 @@
+The generated MSTest test does not compile. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test class that does not compile:
+using FluentValidation;
+using FluentValidation.TestHelper;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+
+namespace FluentValidation.Tests.Validators {
+	[TestClass]
+	public class CreditCardValidatorTests {
+		[TestInitialize]
+		public void Initialize() {
+			Validator = new CreditCardValidator<string>();
+		}
+
+		private CreditCardValidator<string> Validator { get; set; }
+
+		[TestMethod]
+		public void IsValid_CreditCardNumber_ReturnsTrue() {
+			// Arrange
+			var validationContext = new ValidationContext<string>("1234567890123456");
+
+			// Act
+			var result = Validator.IsValid(validationContext);
+
+			// Assert
+			result.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void IsValid_InvalidCreditCardNumber_ReturnsFalse() {
+			// Arrange
+			var validationContext = new ValidationContext<string>("123456789012345");
+
+			// Act
+			var result = Validator.IsValid(validationContext);
+
+			// Assert
+			result.Should().BeFalse();
+		}
+
+		[TestMethod]
+		public void IsValid_NullValue_ReturnsTrue() {
+			// Arrange
+			var validationContext = new ValidationContext<string>(null);
+
+			// Act
+			var result = Validator.IsValid(validationContext);
+
+			// Assert
+			result.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void IsValid_EmptyString_ReturnsTrue() {
+			// Arrange
+			var validationContext = new ValidationContext<string>("");
+
+			// Act
+			var result = Validator.IsValid(validationContext);
+
+			// Assert
+			result.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void IsValid_InvalidFormat_ReturnsFalse() {
+			// Arrange
+			var validationContext = new ValidationContext<string>("123456789012345a");
+
+			// Act
+			var result = Validator.IsValid(validationContext);
+
+			// Assert
+			result.Should().BeFalse();
+		}
+
+		[TestMethod]
+		public void IsValid_Whitespace_ReturnsTrue() {
+			// Arrange
+			var validationContext = new ValidationContext<string>("1234 5678 9012 3456");
+
+			// Act
+			var result = Validator.IsValid(validationContext);
+
+			// Assert
+			result.Should().BeTrue();
+		}
+	}
+}
+
+
+Error Messages:
+Here are the error messages reported by the IDE:
+Severity	Code	Description	Line	Details
+Error (active)	CS0246	The type or namespace name 'CreditCardValidator<>' could not be found (are you missing a using directive or an assembly reference?)	11	
+Error (active)	CS0246	The type or namespace name 'CreditCardValidator<>' could not be found (are you missing a using directive or an assembly reference?)	14	
+
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the IsValid method from the CreditCardValidator class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+namespace FluentValidation.Validators;
+
+using System.Linq;
+
+/// <summary>
+/// Ensures that the property value is a valid credit card number.
+/// </summary>
+public class CreditCardValidator<T> : PropertyValidator<T,string>, ICreditCardValidator {
+	public override bool IsValid(ValidationContext<T> context, string value) {
+		if (value == null) {
+			return true;
+		}
+
+		value = value.Replace("-", "").Replace(" ", "");
+
+		int checksum = 0;
+		bool evenDigit = false;
+		// http://www.beachnet.com/~hstiles/cardtype.html
+		foreach (char digit in value.ToCharArray().Reverse()) {
+			if (!char.IsDigit(digit)) {
+				return false;
+			}
+
+			int digitValue = (digit - '0') * (evenDigit ? 2 : 1);
+			evenDigit = !evenDigit;
+
+			while (digitValue > 0) {
+				checksum += digitValue % 10;
+				digitValue /= 10;
+			}
+		}
+
+		return (checksum % 10) == 0;
+	}
+}
+
+Here are additional project-specific details referenced in the method:
+ValidationContext<T>:
+- namespace: FluentValidation
+- Constructor: ValidationContext<T>(T instanceToValidate)
+

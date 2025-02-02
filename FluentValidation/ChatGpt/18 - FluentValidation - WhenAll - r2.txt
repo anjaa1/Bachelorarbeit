@@ -1,0 +1,263 @@
+The generated MSTest test compiles but fails during execution. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test that does not compile:
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using FluentValidation.Results;
+using FluentValidation.TestHelper;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+[TestClass]
+public class ValidationTestExtensionTests {
+	private class TestValidationContinuation : ITestValidationContinuation {
+		private readonly IEnumerable<ValidationFailure> _failures;
+		private readonly List<Func<ValidationFailure, bool>> _predicates = new();
+
+		public TestValidationContinuation(IEnumerable<ValidationFailure> failures) {
+			_failures = failures;
+		}
+
+		public void ApplyPredicate(Func<ValidationFailure, bool> predicate) {
+			_predicates.Add(predicate);
+		}
+
+		public IEnumerable<ValidationFailure> UnmatchedFailures {
+			get {
+				foreach (var failure in _failures) {
+					if (!_predicates.Any() || !_predicates.All(predicate => predicate(failure))) {
+						yield return failure;
+					}
+				}
+			}
+		}
+
+		public IEnumerator<ValidationFailure> GetEnumerator() {
+			return _failures.GetEnumerator();
+		}
+
+		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() {
+			return GetEnumerator();
+		}
+	}
+
+	[TestMethod]
+	public void WhenAll_ShouldPass_WhenAllFailuresMatchPredicate() {
+		// Arrange
+		var failures = new List<ValidationFailure> {
+						new ValidationFailure("Property1", "Error 1"),
+						new ValidationFailure("Property2", "Error 2")
+				};
+		var continuation = new TestValidationContinuation(failures);
+		Func<ValidationFailure, bool> predicate = failure => failure.ErrorMessage.Contains("Error");
+
+		// Act
+		var result = ValidationTestExtension.WhenAll(continuation, predicate);
+
+		// Assert
+		Assert.IsNotNull(result);
+	}
+	Here are the error messages reported by the IDE:
+	Test method ValidationTestExtensionTests.WhenAll_ShouldPass_WhenAllFailuresMatchPredicate threw exception: 
+System.InvalidCastException: Unable to cast object of type 'TestValidationContinuation' to type 'FluentValidation.TestHelper.TestValidationContinuation'.
+
+	[TestMethod]
+	[ExpectedException(typeof(ValidationTestException))]
+	public void WhenAll_ShouldThrowException_WhenSomeFailuresDoNotMatchPredicate() {
+		// Arrange
+		var failures = new List<ValidationFailure> {
+						new ValidationFailure("Property1", "Error 1"),
+						new ValidationFailure("Property2", "Other Error")
+				};
+		var continuation = new TestValidationContinuation(failures);
+		Func<ValidationFailure, bool> predicate = failure => failure.ErrorMessage.Contains("Error");
+
+		// Act
+		ValidationTestExtension.WhenAll(continuation, predicate);
+
+		// Assert is handled by ExpectedException
+	}
+	Here are the error messages reported by the IDE:
+	 Test method threw exception System.InvalidCastException, but exception FluentValidation.TestHelper.ValidationTestException was expected. Exception message: System.InvalidCastException: Unable to cast object of type 'TestValidationContinuation' to type 'FluentValidation.TestHelper.TestValidationContinuation'.
+
+	[TestMethod]
+	[ExpectedException(typeof(ValidationTestException))]
+	public void WhenAll_ShouldThrowException_WhenNoFailuresMatchPredicate() {
+		// Arrange
+		var failures = new List<ValidationFailure> {
+						new ValidationFailure("Property1", "Other Error"),
+						new ValidationFailure("Property2", "Another Error")
+				};
+		var continuation = new TestValidationContinuation(failures);
+		Func<ValidationFailure, bool> predicate = failure => failure.ErrorMessage.Contains("Error");
+
+		// Act
+		ValidationTestExtension.WhenAll(continuation, predicate);
+
+		// Assert is handled by ExpectedException
+	}
+	Here are the error messages reported by the IDE:
+	Test method threw exception System.InvalidCastException, but exception FluentValidation.TestHelper.ValidationTestException was expected. Exception message: System.InvalidCastException: Unable to cast object of type 'TestValidationContinuation' to type 'FluentValidation.TestHelper.TestValidationContinuation'.
+
+	[TestMethod]
+	public void WhenAll_ShouldPass_WhenNoFailuresPresent() {
+		// Arrange
+		var failures = new List<ValidationFailure>();
+		var continuation = new TestValidationContinuation(failures);
+		Func<ValidationFailure, bool> predicate = failure => failure.ErrorMessage.Contains("Error");
+
+		// Act
+		var result = ValidationTestExtension.WhenAll(continuation, predicate);
+
+		// Assert
+		Assert.IsNotNull(result);
+	}
+	Here are the error messages reported by the IDE:
+Test method ValidationTestExtensionTests.WhenAll_ShouldPass_WhenNoFailuresPresent threw exception: 
+System.InvalidCastException: Unable to cast object of type 'TestValidationContinuation' to type 'FluentValidation.TestHelper.TestValidationContinuation'.
+	[TestMethod]
+	public void WhenAll_ShouldThrowCustomExceptionMessage_WhenExceptionMessageProvided() {
+		// Arrange
+		var failures = new List<ValidationFailure> {
+						new ValidationFailure("Property1", "Other Error")
+				};
+		var continuation = new TestValidationContinuation(failures);
+		Func<ValidationFailure, bool> predicate = failure => failure.ErrorMessage.Contains("Error");
+		string customMessage = "Custom exception message";
+
+		try {
+			// Act
+			ValidationTestExtension.WhenAll(continuation, predicate, customMessage);
+		}
+		catch (ValidationTestException ex) {
+			// Assert
+			Assert.IsTrue(ex.Message.Contains(customMessage));
+		}
+	}
+	Here are the error messages reported by the IDE:
+	 Test method ValidationTestExtensionTests.WhenAll_ShouldThrowCustomExceptionMessage_WhenExceptionMessageProvided threw exception: 
+System.InvalidCastException: Unable to cast object of type 'TestValidationContinuation' to type 'FluentValidation.TestHelper.TestValidationContinuation'.
+}
+
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the WhenAll method from the ValidationTestExtension class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+namespace FluentValidation.TestHelper;
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+using Internal;
+using Results;
+using Validators;
+
+public static class ValidationTestExtension {
+	internal const string MatchAnyFailure = "__FV__ANY";
+
+	public static ITestValidationContinuation WhenAll(this ITestValidationContinuation failures, Func<ValidationFailure, bool> failurePredicate, string exceptionMessage = null) {
+		//TODO 12.0 remove casts.
+		var result = new TestValidationContinuation(((TestValidationContinuation)failures).MatchedFailures, failures);
+		result.ApplyPredicate(failurePredicate);
+
+		bool allMatched = !result.UnmatchedFailures.Any();
+
+		if (!allMatched) {
+			var failure = result.UnmatchedFailures.First();
+			string message = BuildErrorMessage(failure, exceptionMessage, "Found an unexpected validation error");
+			throw new ValidationTestException(message);
+		}
+
+		return result;
+	}
+}
+
+Here are additional project-specific details referenced in the method:
+ValidationFailure:
+- namespace: FluentValidation.Results
+- property: string Errormessage
+- Constructor: ValidationFailure(string propertyName, string errorMessage)
+
+ITestValidationContinuation
+- namespace: FluentValidation.TestHelper
+- interface: public interface ITestValidationContinuation : IEnumerable<ValidationFailure> {
+	IEnumerable<ValidationFailure> UnmatchedFailures { get; }
+}
+- Properties: IEnumerable<ValidationFailure> UnmatchedFailures
+- methods: IEnumerator<ValidationFailure> GetEnumerator()
+- dependencies: ValidationFailure (Namespace: FluentValidation.Results)
+
+here is the interface: namespace FluentValidation.TestHelper;
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using Results;
+
+public interface ITestValidationWith : ITestValidationContinuation {
+}
+
+public interface ITestValidationContinuation : IEnumerable<ValidationFailure> {
+	IEnumerable<ValidationFailure> UnmatchedFailures { get; }
+	//TODO: 12.x expose MatchedFailures on the interface too.
+}
+
+internal class TestValidationContinuation : ITestValidationContinuation, ITestValidationWith {
+	private readonly IEnumerable<ValidationFailure> _allFailures;
+	private readonly List<Func<ValidationFailure,bool>> _predicates;
+
+	public ITestValidationContinuation Parent { get; }
+
+	public TestValidationContinuation(IEnumerable<ValidationFailure> failures, ITestValidationContinuation parent = null) {
+		_allFailures = failures;
+		_predicates = new List<Func<ValidationFailure, bool>>();
+		Parent = parent;
+	}
+
+	public void ApplyPredicate(Func<ValidationFailure, bool> failurePredicate) {
+		_predicates.Add(failurePredicate);
+	}
+
+	public IEnumerator<ValidationFailure> GetEnumerator() {
+		return MatchedFailures.GetEnumerator();
+	}
+
+	IEnumerator IEnumerable.GetEnumerator() {
+		return ((IEnumerable) MatchedFailures).GetEnumerator();
+	}
+
+	public IEnumerable<ValidationFailure> MatchedFailures {
+		get {
+			var matchedFailures = _allFailures;
+			foreach (var predicate in _predicates) {
+				matchedFailures = matchedFailures.Where(predicate);
+			}
+
+			return matchedFailures;
+		}
+	}
+
+	public IEnumerable<ValidationFailure> UnmatchedFailures {
+		get {
+			foreach (var failure in _allFailures) {
+				foreach (var predicate in _predicates) {
+					if (!predicate(failure)) {
+						yield return failure;
+						break;
+					}
+				}
+			}
+		}
+	}
+}
+

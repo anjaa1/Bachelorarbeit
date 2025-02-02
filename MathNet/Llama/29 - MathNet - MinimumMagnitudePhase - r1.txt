@@ -1,0 +1,171 @@
+The generated MSTest test does not compile. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test class that does not compile:
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
+using System.Linq;
+using Complex = System.Numerics.Complex;
+
+namespace MathNet.Numerics.Tests
+{
+    [TestClass]
+    public class StreamingStatisticsTests
+    {
+        [TestMethod]
+        public void MinimumMagnitudePhase_ValidInput_SingleElement_ReturnsCorrectResult()
+        {
+            // Arrange
+            var stream = new Complex[] { new Complex(3.0, 4.0) };
+
+            // Act
+            var result = StreamingStatistics.MinimumMagnitudePhase(stream);
+
+            // Assert
+            Assert.AreEqual(3.0, result.Real);
+            Assert.AreEqual(4.0, result.Imaginary);
+        }
+
+        [TestMethod]
+        public void MinimumMagnitudePhase_ValidInput_MultipleElements_ReturnsCorrectResult()
+        {
+            // Arrange
+            var stream = new Complex[] { new Complex(3.0, 4.0), new Complex(5.0, 6.0) };
+
+            // Act
+            var result = StreamingStatistics.MinimumMagnitudePhase(stream);
+
+            // Assert
+            Assert.AreEqual(3.0, result.Real);
+            Assert.AreEqual(4.0, result.Imaginary);
+        }
+
+        [TestMethod]
+        public void MinimumMagnitudePhase_InputWithNaN_ReturnsNaN()
+        {
+            // Arrange
+            var stream = new Complex[] { new Complex(3.0, 4.0), new Complex(double.NaN, double.NaN) };
+
+            // Act
+            var result = StreamingStatistics.MinimumMagnitudePhase(stream);
+
+            // Assert
+            Assert.AreEqual(double.NaN, result.Real);
+            Assert.AreEqual(double.NaN, result.Imaginary);
+        }
+
+        [TestMethod]
+        public void MinimumMagnitudePhase_EmptyInput_ReturnsNaN()
+        {
+            // Arrange
+            var stream = new Complex[] { };
+
+            // Act
+            var result = StreamingStatistics.MinimumMagnitudePhase(stream);
+
+            // Assert
+            Assert.AreEqual(double.NaN, result.Real);
+            Assert.AreEqual(double.NaN, result.Imaginary);
+        }
+
+        [TestMethod]
+        public void MinimumMagnitudePhase_InputWithSingleNaN_ReturnsNaN()
+        {
+            // Arrange
+            var stream = new Complex[] { new Complex(double.NaN, double.NaN) };
+
+            // Act
+            var result = StreamingStatistics.MinimumMagnitudePhase(stream);
+
+            // Assert
+            Assert.AreEqual(double.NaN, result.Real);
+            Assert.AreEqual(double.NaN, result.Imaginary);
+        }
+
+        [TestMethod]
+        public void MinimumMagnitudePhase_InputWithMultipleNaN_ReturnsNaN()
+        {
+            // Arrange
+            var stream = new Complex[] { new Complex(double.NaN, double.NaN), new Complex(double.NaN, double.NaN) };
+
+            // Act
+            var result = StreamingStatistics.MinimumMagnitudePhase(stream);
+
+            // Assert
+            Assert.AreEqual(double.NaN, result.Real);
+            Assert.AreEqual(double.NaN, result.Imaginary);
+        }
+    }
+}
+
+Error Messages:
+Here are the error messages reported by the IDE:
+Severity	Code	Description	Line	Details
+Error (active)	CS0103	The name 'StreamingStatistics' does not exist in the current context	88	
+Error (active)	CS0103	The name 'StreamingStatistics' does not exist in the current context	18	
+Error (active)	CS0103	The name 'StreamingStatistics' does not exist in the current context	32	
+Error (active)	CS0103	The name 'StreamingStatistics' does not exist in the current context	46	
+Error (active)	CS0103	The name 'StreamingStatistics' does not exist in the current context	60	
+Error (active)	CS0103	The name 'StreamingStatistics' does not exist in the current context	74	
+
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the MinimumMagnitudePhase method from the StreamingStatistics class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Complex = System.Numerics.Complex;
+
+namespace MathNet.Numerics.Statistics
+{
+    /// <summary>
+    /// Statistics operating on an IEnumerable in a single pass, without keeping the full data in memory.
+    /// Can be used in a streaming way, e.g. on large datasets not fitting into memory.
+    /// </summary>
+    /// <seealso cref="SortedArrayStatistics"/>
+    /// <seealso cref="StreamingStatistics"/>
+    /// <seealso cref="Statistics"/>
+    public static class StreamingStatistics
+    {
+        /// <summary>
+        /// Returns the smallest absolute value from the enumerable, in a single pass without memoization.
+        /// Returns NaN if data is empty or any entry is NaN.
+        /// </summary>
+        /// <param name="stream">Sample stream, no sorting is assumed.</param>
+        public static Complex MinimumMagnitudePhase(IEnumerable<Complex> stream)
+        {
+            double minMagnitude = double.PositiveInfinity;
+            Complex min = new Complex(double.PositiveInfinity, double.PositiveInfinity);
+            bool any = false;
+
+            foreach (var d in stream)
+            {
+                double magnitude = d.Magnitude;
+                if (double.IsNaN(magnitude))
+                {
+                    return new Complex(double.NaN, double.NaN);
+                }
+                if (magnitude < minMagnitude || magnitude == minMagnitude && d.Phase < min.Phase)
+                {
+                    minMagnitude = magnitude;
+                    min = d;
+                }
+
+                any = true;
+            }
+
+            return any ? min : new Complex(double.NaN, double.NaN);
+        }
+	}
+}
+
+Here are additional project-specific details referenced in the method:
+
+Complex: A structure representing complex numbers with real and imaginary parts. It provides methods for mathematical operations
+- Constructor: public Complex(double real, double imaginary)
+- Namespace: System.Numerics
+

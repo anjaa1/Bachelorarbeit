@@ -1,0 +1,92 @@
+The generated MSTest test compiles but fails during execution. Please correct the tests to fulfill the initial task.
+
+Generated Test:
+Below is the generated MSTest test that does not compile:
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using FluentValidation.Internal;
+
+namespace FluentValidation.Tests {
+	[TestClass]
+	public class MessageFormatterTests {
+		private MessageFormatter _formatter;
+
+		[TestInitialize]
+		public void Setup() {
+			_formatter = new MessageFormatter();
+		}
+		[TestMethod]
+		public void BuildMessage_WithFormattedPlaceholder_AppliesFormatting() {
+			// Arrange
+			string template = "Amount: {Price:C2}";
+			_formatter.GetType().GetField("_placeholderValues", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+					?.SetValue(_formatter, new Dictionary<string, object>
+					{
+										{ "Price", 42.5 }
+					});
+
+			// Act
+			string result = _formatter.BuildMessage(template);
+
+			// Assert
+			Assert.AreEqual("Amount: $42.50", result);
+		}
+		Here are the error messages reported by the IDE:
+		Assert.AreEqual failed. Expected:<Amount: $42.50>. Actual:<Amount: 42,50 €>.
+
+
+				[TestMethod]
+		public void BuildMessage_WithNullTemplate_ReturnsNull() {
+			// Act
+			string result = _formatter.BuildMessage(null);
+
+			// Assert
+			Assert.IsNull(result);
+		}
+		Here are the error messages reported by the IDE:
+		Test method FluentValidation.Tests.MessageFormatterTests.BuildMessage_WithNullTemplate_ReturnsNull threw exception: 
+System.ArgumentNullException: Value cannot be null. (Parameter 'input')
+
+}}
+		
+
+Inital Task:
+Here is the inital Task that was provided for generating the test:
+Create a test class using the MSTest framework to test the BuildMessage method from the MessageFormatter class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+namespace FluentValidation.Internal;
+
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+
+/// <summary>
+/// Assists in the construction of validation messages.
+/// </summary>
+public class MessageFormatter {
+	readonly Dictionary<string, object> _placeholderValues = new(2);
+
+	private static readonly Regex _keyRegex = new Regex("{([^{}:]+)(?::([^{}]+))?}", RegexOptions.Compiled);
+
+	/// <summary>
+	/// Constructs the final message from the specified template.
+	/// </summary>
+	/// <param name="messageTemplate">Message template</param>
+	/// <returns>The message with placeholders replaced with their appropriate values</returns>
+	public virtual string BuildMessage(string messageTemplate) {
+		return _keyRegex.Replace(messageTemplate, m =>	{
+			var key = m.Groups[1].Value;
+
+			if (!_placeholderValues.TryGetValue(key, out var value))
+				return m.Value; // No placeholder / value
+
+			var format = m.Groups[2].Success // Format specified?
+				? $"{{0:{m.Groups[2].Value}}}"
+				: null;
+
+			return format == null
+				? value?.ToString()
+				: string.Format(format, value);
+		});
+	}
+}

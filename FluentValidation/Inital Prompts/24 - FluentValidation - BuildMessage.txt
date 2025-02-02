@@ -1,0 +1,39 @@
+Create a test class using the MSTest framework to test the BuildMessage method from the MessageFormatter class. The goal is to validate the method's functionality across different scenarios, including typical and edge cases, ensuring it handles both valid and invalid inputs appropriately.
+
+The method to be tested is:
+
+namespace FluentValidation.Internal;
+
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+
+/// <summary>
+/// Assists in the construction of validation messages.
+/// </summary>
+public class MessageFormatter {
+	readonly Dictionary<string, object> _placeholderValues = new(2);
+
+	private static readonly Regex _keyRegex = new Regex("{([^{}:]+)(?::([^{}]+))?}", RegexOptions.Compiled);
+
+	/// <summary>
+	/// Constructs the final message from the specified template.
+	/// </summary>
+	/// <param name="messageTemplate">Message template</param>
+	/// <returns>The message with placeholders replaced with their appropriate values</returns>
+	public virtual string BuildMessage(string messageTemplate) {
+		return _keyRegex.Replace(messageTemplate, m =>	{
+			var key = m.Groups[1].Value;
+
+			if (!_placeholderValues.TryGetValue(key, out var value))
+				return m.Value; // No placeholder / value
+
+			var format = m.Groups[2].Success // Format specified?
+				? $"{{0:{m.Groups[2].Value}}}"
+				: null;
+
+			return format == null
+				? value?.ToString()
+				: string.Format(format, value);
+		});
+	}
+}
